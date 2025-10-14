@@ -1,0 +1,66 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.TropicalDrinks" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Paleta -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        <item name="colorPrimaryContainer">@color/colorPrimaryVariant</item>
+
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorOnSecondary">@color/colorOnSecondary</item>
+        <item name="colorSecondaryContainer">@color/colorSecondaryVariant</item>
+
+        <item name="colorTertiary">@color/colorTertiary</item>
+        <item name="colorOnTertiary">@color/colorOnTertiary</item>
+
+        <item name="android:colorBackground">@color/colorBackground</item>
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorOnSurface">@color/colorOnSurface</item>
+        <item name="colorError">@color/colorError</item>
+        <item name="colorOnError">@color/colorOnError</item>
+
+        <!-- Componentes -->
+        <item name="materialButtonStyle">@style/Widget.Tropical.Button</item>
+        <item name="chipStyle">@style/Widget.Tropical.Chip</item>
+        <item name="cardViewStyle">@style/Widget.Tropical.Card</item>
+
+        <!-- Status/Navigation bar -->
+        <item name="android:statusBarColor">@color/colorPrimaryVariant</item>
+        <item name="android:navigationBarColor">@color/colorSurface</item>
+        <item name="android:navigationBarDividerColor">@color/black_12</item>
+    </style>
+
+    <style name="Widget.Tropical.Button" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorOnPrimary</item>
+        <item name="rippleColor">@color/white_26</item>
+        <item name="android:insetLeft">12dp</item>
+        <item name="android:insetRight">12dp</item>
+        <item name="cornerRadius">16dp</item>
+    </style>
+
+    <style name="Widget.Tropical.Chip" parent="Widget.Material3.Chip.Filter">
+        <item name="chipBackgroundColor">@color/colorGuavaPink</item>
+        <item name="chipStrokeColor">@color/colorIceMint</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="rippleColor">@color/black_12</item>
+        <item name="android:textColor">@color/colorOnSurface</item>
+    </style>
+
+    <style name="Widget.Tropical.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/colorSurface</item>
+        <item name="cardUseCompatPadding">true</item>
+        <item name="cardPreventCornerOverlap">true</item>
+        <item name="cardCornerRadius">20dp</item>
+        <item name="elevation">3dp</item>
+    </style>
+
+    <font-family xmlns:android="http://schemas.android.com/apk/res/android">
+        <font
+            android:fontStyle="normal"
+            android:fontWeight="400"
+            android:font="@font/lato_regular" />
+    </font-family>
+
+    <style name="Theme.DrinkFinder" parent="Base.Theme.DrinkFinder" />
+</resources>

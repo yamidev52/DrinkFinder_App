@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Roles Material -->
+    <color name="colorPrimary">#00B3A4</color>         <!-- Tropical Teal -->
+    <color name="colorOnPrimary">#E6FFFA</color>       <!-- Seafoam -->
+    <color name="colorPrimaryVariant">#009C8F</color>
+
+    <color name="colorSecondary">#FF6B6B</color>       <!-- Sunset Coral -->
+    <color name="colorOnSecondary">#FFFFFF</color>
+    <color name="colorSecondaryVariant">#E25757</color>
+
+    <color name="colorTertiary">#FFC300</color>        <!-- Mango Gold -->
+    <color name="colorOnTertiary">#1A1A1A</color>
+
+    <color name="colorBackground">#FFF8F0</color>      <!-- Coconut Cream -->
+    <color name="colorOnBackground">#111111</color>
+
+    <color name="colorSurface">#FFF1DF</color>         <!-- Sand Surface -->
+    <color name="colorOnSurface">#222222</color>
+
+    <color name="colorError">#D7263D</color>           <!-- Hibiscus Red -->
+    <color name="colorOnError">#FFFFFF</color>
+
+    <!-- Apoyos -->
+    <color name="colorGuavaPink">#FFD1DC</color>
+    <color name="colorIceMint">#CDECE7</color>
+
+    <!-- Opacidades útiles (usadas en ripple/overlays) -->
+    <color name="black_12">#1F000000</color>
+    <color name="black_26">#42000000</color>
+    <color name="black_54">#8A000000</color>
+    <color name="white_12">#1FFFFFFF</color>
+    <color name="white_26">#42FFFFFF</color>
+    <color name="white_54">#8AFFFFFF</color>
+
+</resources>
