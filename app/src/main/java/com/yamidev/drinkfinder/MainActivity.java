@@ -1,104 +1,169 @@
 package com.yamidev.drinkfinder;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+import com.yamidev.drinkfinder.DrinkRepository;
+import com.yamidev.drinkfinder.Drink;
+import com.yamidev.drinkfinder.DrinkAdapter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView rvDrinks;
+    private DrinkAdapter adapter;
+    private DrinkRepository repo;
+
+    private ArrayAdapter<String> categoryAdapter;
+    private ArrayAdapter<String> alcoholicAdapter;
+
+    private String currentQuery = "";
+    private String selectedCategory = "Todas";
+    private String selectedAlcoholic = "Todos";
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable pendingSearch;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        rvDrinks = findViewById(R.id.rvDrinks);
-        rvDrinks.setLayoutManager(new LinearLayoutManager(this));
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        List<Drink> data = new ArrayList<>();
-        data.add(new Drink("Mojito", "Cocktail"));
-        data.add(new Drink("Piña Colada", "Tropical"));
-        data.add(new Drink("Margarita", "Clásico"));
-        data.add(new Drink("Daiquiri", "Rum"));
-        data.add(new Drink("Caipirinha", "Brasil"));
+        RecyclerView rv = findViewById(R.id.rvDrinks);
+        adapter = new DrinkAdapter();
+        rv.setAdapter(adapter);
 
-        rvDrinks.setAdapter(new DrinkAdapter(data, new OnDrinkClick() {
-            @Override
-            public void onClick(Drink d) {
-                Toast.makeText(MainActivity.this, d.name + " seleccionado", Toast.LENGTH_SHORT).show();
+        repo = new DrinkRepository();
+
+        // Spinners
+        android.widget.Spinner spnCategory = findViewById(R.id.spnCategory);
+        android.widget.Spinner spnAlcoholic = findViewById(R.id.spnAlcoholic);
+
+        categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, new ArrayList<>());
+        categoryAdapter.add("Todas");
+        spnCategory.setAdapter(categoryAdapter);
+
+        alcoholicAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+                Arrays.asList("Todos", "Alcoholic", "Non alcoholic", "Optional alcohol"));
+        spnAlcoholic.setAdapter(alcoholicAdapter);
+
+        spnCategory.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
+                selectedCategory = (String) parent.getItemAtPosition(position);
+                adapter.applyFilter(currentQuery, selectedCategory, selectedAlcoholic);
             }
-        }));
+            @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+        });
+
+        spnAlcoholic.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
+                selectedAlcoholic = (String) parent.getItemAtPosition(position);
+                adapter.applyFilter(currentQuery, selectedCategory, selectedAlcoholic);
+            }
+            @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+        });
+
+        TextInputLayout tilQuery = findViewById(R.id.tilQuery);
+        TextInputEditText etQuery = findViewById(R.id.etQuery);
+
+        tilQuery.setEndIconOnClickListener(v -> {
+            currentQuery = safeText(etQuery);
+            triggerRemoteSearch(currentQuery);
+        });
+
+        etQuery.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                currentQuery = safeText(etQuery);
+                triggerRemoteSearch(currentQuery);
+                return true;
+            }
+            return false;
+        });
+
+        etQuery.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                currentQuery = s == null ? "" : s.toString();
+                if (pendingSearch != null) handler.removeCallbacks(pendingSearch);
+                pendingSearch = () -> {
+                    if (currentQuery.trim().length() >= 2) {
+                        triggerRemoteSearch(currentQuery.trim());
+                    } else {
+                        adapter.applyFilter(currentQuery, selectedCategory, selectedAlcoholic);
+                    }
+                };
+                handler.postDelayed(pendingSearch, 400);
+            }
+            @Override public void afterTextChanged(android.text.Editable s) {}
+        });
+
+
+        repo.listCategories(new DrinkRepository.Result<List<String>>() {
+            @Override public void onSuccess(List<String> cats) {
+                if (cats != null) categoryAdapter.addAll(cats);
+                categoryAdapter.notifyDataSetChanged();
+            }
+            @Override public void onError(Throwable t) {
+                Toast.makeText(MainActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        triggerRemoteSearch(randomDrink());
     }
 
-    // ====== Modelo básico ======
-    static class Drink {
-        final String name;
-        final String category;
-
-        Drink(String name, String category) {
-            this.name = name;
-            this.category = category;
+    private void triggerRemoteSearch(String query) {
+        if (query.isEmpty()) {
+            adapter.setItems(new ArrayList<>());
+            return;
         }
+        repo.searchByName(query, new DrinkRepository.Result<List<Drink>>() {
+            @Override public void onSuccess(List<Drink> data) {
+                adapter.setItems(data);
+                adapter.applyFilter(currentQuery, selectedCategory, selectedAlcoholic);
+            }
+            @Override public void onError(Throwable t) {
+                Toast.makeText(MainActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    interface OnDrinkClick {
-        void onClick(Drink d);
+    private String safeText(TextInputEditText et) {
+        CharSequence cs = et.getText();
+        return cs == null ? "" : cs.toString().trim();
     }
 
-    // ====== Adapter básico (inner class) ======
-    static class DrinkAdapter extends RecyclerView.Adapter<DrinkViewHolder> {
+    private String randomDrink(){
+        String[] drinks = {
+                "margarita",
+                "ron",
+                "beer",
+                "cocktail",
+                "mojito",
+                "gin",
+                "vodka",
+                "rum",
+                "tequila",
+                "whiskey",
+                "coffee"
+        };
+        String random = String.valueOf((int) (Math.random() * drinks.length));
+        return drinks[Integer.parseInt(random)];
 
-        private final List<Drink> items;
-        private final OnDrinkClick listener;
-
-        DrinkAdapter(List<Drink> items, OnDrinkClick listener) {
-            this.items = items;
-            this.listener = listener;
-        }
-
-        @Override
-        public DrinkViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType) {
-            android.view.View view = android.view.LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_drink_card, parent, false);
-            return new DrinkViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(DrinkViewHolder holder, int position) {
-            Drink d = items.get(position);
-            holder.tvName.setText(d.name);
-            holder.tvCategory.setText(d.category);
-            holder.itemView.setOnClickListener(v -> listener.onClick(d));
-            holder.img.setImageResource(R.mipmap.ic_launcher); // usa el ícono del proyecto
-        }
-
-        @Override
-        public int getItemCount() {
-            return items.size();
-        }
-    }
-
-    // ====== ViewHolder (inner class) ======
-    static class DrinkViewHolder extends RecyclerView.ViewHolder {
-        android.widget.ImageView img;
-        android.widget.TextView tvName, tvCategory;
-        MaterialCardView card;
-
-        DrinkViewHolder(android.view.View itemView) {
-            super(itemView);
-            img = itemView.findViewById(R.id.imgDrink);
-            tvName = itemView.findViewById(R.id.tvDrinkName);
-            tvCategory = itemView.findViewById(R.id.tvDrinkCategory);
-            card = (MaterialCardView) itemView;
-        }
     }
 }

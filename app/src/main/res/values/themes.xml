@@ -57,13 +57,5 @@
         <item name="elevation">3dp</item>
     </style>
 
-
-
-
-
-
-
-
-
     <style name="Theme.DrinkFinder" parent="Base.Theme.DrinkFinder" />
 </resources>
