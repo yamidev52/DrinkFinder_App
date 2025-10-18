@@ -1,20 +1,32 @@
 package com.yamidev.drinkfinder.drink;
 
-import android.widget.Filter;
-import android.widget.Filterable;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.yamidev.drinkfinder.R;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.yamidev.drinkfinder.Drink;
+import com.yamidev.drinkfinder.R;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -23,8 +35,8 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
 
     public interface OnItemClick { void onClick(Drink drink); }
 
-    private final List<Drink> items = new ArrayList<>();     // visibles
-    private final List<Drink> all   = new ArrayList<>();     // copia completa para filtrar
+    private final List<Drink> items = new ArrayList<>();
+    private final List<Drink> all   = new ArrayList<>();
 
     private OnItemClick listener;
 
@@ -71,6 +83,9 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
                 .centerCrop()
                 .into(h.img);
         h.itemView.setOnClickListener(v -> { if (listener != null) listener.onClick(d); });
+        h.btnShare.setOnClickListener(v -> {
+            shareDrinkWithImage(v.getContext(), d);
+        });
     }
 
     @Override public int getItemCount() { return items.size(); }
@@ -111,11 +126,77 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
     static class DrinkVH extends RecyclerView.ViewHolder {
         ImageView img;
         TextView tvName, tvCategory;
+        ImageButton btnShare;
+
         DrinkVH(@NonNull View itemView) {
             super(itemView);
             img = itemView.findViewById(R.id.imgDrink);
             tvName = itemView.findViewById(R.id.tvDrinkName);
             tvCategory = itemView.findViewById(R.id.tvDrinkCategory);
+            btnShare = itemView.findViewById(R.id.btnShare);
         }
+    }
+
+    private void shareDrinkText(Context ctx, Drink drink) {
+        String body = buildShareText(drink);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_SUBJECT, drink.getName());
+        intent.putExtra(Intent.EXTRA_TEXT, body);
+        ctx.startActivity(Intent.createChooser(intent, "Compartir bebida…"));
+    }
+
+    private String buildShareText(Drink d) {
+        return "🍹 " + d.getName() + "\n" +
+                "Categoría: " + d.getCategory() + "\n" +
+                "Tipo: " + d.getAlcoholic() + "\n\n" +
+                "Instrucciones: " + d.getInstructions() + "\n\n" +
+                "Imagen: " + d.getThumbnail() + "\n" +
+                "#DrinkFinderApp";
+    }
+
+    private void shareDrinkWithImage(Context ctx, Drink drink) {
+        String imageUrl = drink.getThumbnail();
+        String body = buildShareText(drink);
+
+        Glide.with(ctx)
+                .asBitmap()
+                .load(imageUrl)
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        try {
+                            Uri uri = saveBitmapToCache(ctx, resource, drink.getName());
+                            Intent share = new Intent(Intent.ACTION_SEND);
+                            share.setType("image/*");
+                            share.putExtra(Intent.EXTRA_STREAM, uri);
+                            share.putExtra(Intent.EXTRA_TEXT, body);
+                            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            ctx.startActivity(Intent.createChooser(share, "Compartir bebida…"));
+                        } catch (IOException e) {
+                            shareDrinkText(ctx, drink);
+                        }
+                    }
+
+                    @Override public void onLoadCleared(@Nullable Drawable placeholder) {}
+                    @Override public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                        shareDrinkText(ctx, drink);
+                    }
+                });
+    }
+
+    private Uri saveBitmapToCache(Context ctx, Bitmap bmp, String name) throws IOException {
+        File imagesFolder = new File(ctx.getCacheDir(), "images");
+        if (!imagesFolder.exists()) imagesFolder.mkdirs();
+
+        File file = new File(imagesFolder, name.replaceAll("\\s+", "_") + ".jpg");
+        FileOutputStream stream = new FileOutputStream(file);
+        bmp.compress(Bitmap.CompressFormat.JPEG, 95, stream);
+        stream.flush();
+        stream.close();
+
+        return androidx.core.content.FileProvider.getUriForFile(
+                ctx, ctx.getPackageName() + ".fileprovider", file
+        );
     }
 }

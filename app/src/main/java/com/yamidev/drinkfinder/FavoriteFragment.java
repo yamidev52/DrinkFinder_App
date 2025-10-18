@@ -1,4 +1,4 @@
-package com.yamidev.drinkfinder.fragments;
+package com.yamidev.drinkfinder;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import com.yamidev.drinkfinder.R;
 
 
 public class FavoriteFragment extends Fragment {
@@ -20,6 +19,6 @@ public class FavoriteFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_drinks, container, false);
+        return inflater.inflate(R.layout.fragment_favorites, container, false);
     }
 }
