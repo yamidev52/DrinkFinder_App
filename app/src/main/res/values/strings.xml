@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">DrinkFinder</string>
     <string name="untitled">Untitled</string>
+    <string name="tab_search">Buscar</string>
+    <string name="tab_home">Inicio</string>
+    <string name="tab_favorites">Favoritos</string>
+    <string name="search_hint">Escribe una bebida (ej. mojito)</string>
+    <string name="search_end_icon_cd">Buscar bebida</string>
+    <string name="home_placeholder">Explora recomendaciones y colecciones destacadas.</string>
+    <string name="favorites_placeholder">Aún no tienes favoritos. Guarda tus bebidas preferidas aquí.</string>
 </resources>
