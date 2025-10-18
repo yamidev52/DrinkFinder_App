@@ -1,4 +1,4 @@
-package com.yamidev.drinkfinder;
+package com.yamidev.drinkfinder.presentation.ui;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,9 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.yamidev.drinkfinder.DrinkRepository;
-import com.yamidev.drinkfinder.Drink;
-import com.yamidev.drinkfinder.DrinkAdapter;
+import com.yamidev.drinkfinder.R;
+import com.yamidev.drinkfinder.domain.model.Drink;
+import com.yamidev.drinkfinder.domain.repository.DrinkRepository;
+import com.yamidev.drinkfinder.presentation.adapters.DrinkAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;

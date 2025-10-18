@@ -1,4 +1,4 @@
-package com.yamidev.drinkfinder;
+package com.yamidev.drinkfinder.domain.model;
 
 import java.util.ArrayList;
 import java.util.List;

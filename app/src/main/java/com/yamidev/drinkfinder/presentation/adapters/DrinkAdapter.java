@@ -1,4 +1,4 @@
-package com.yamidev.drinkfinder;
+package com.yamidev.drinkfinder.presentation.adapters;
 
 import android.widget.Filter;
 import android.widget.Filterable;
@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.yamidev.drinkfinder.R;
-import com.yamidev.drinkfinder.Drink;
+import com.yamidev.drinkfinder.domain.model.Drink;
 
 import java.util.ArrayList;
 import java.util.List;
