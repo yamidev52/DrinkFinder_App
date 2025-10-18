@@ -35,8 +35,8 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
 
     public interface OnItemClick { void onClick(Drink drink); }
 
-    private final List<Drink> items = new ArrayList<>();     // visibles
-    private final List<Drink> all   = new ArrayList<>();     // copia completa para filtrar
+    private final List<Drink> items = new ArrayList<>();
+    private final List<Drink> all   = new ArrayList<>();
 
     private OnItemClick listener;
 

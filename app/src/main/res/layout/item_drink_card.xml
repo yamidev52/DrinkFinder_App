@@ -50,15 +50,40 @@
                 android:textSize="14sp"
                 android:textColor="#0E7E6B"
                 android:layout_marginTop="4dp" />
+
+
+
         </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/btnShare"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/rounded_image_bg"
-            android:contentDescription="Share"
-            android:src="@drawable/compartir" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/cardview_compat_inset_shadow"
+            >
+
+            <ImageButton
+                android:id="@+id/btnShare"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_image_bg"
+                android:contentDescription="Share"
+                android:src="@drawable/compartir" />
+
+            <ImageButton
+                android:id="@+id/btnFavoritos"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:contentDescription="Favoritos"
+                android:src="@drawable/favorito"
+                android:background="@drawable/rounded_image_bg"/>
+
+        </LinearLayout>
+
+
+
+
+
 
     </LinearLayout>
 

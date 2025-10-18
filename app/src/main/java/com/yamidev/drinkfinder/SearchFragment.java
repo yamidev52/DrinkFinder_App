@@ -251,13 +251,13 @@ public class SearchFragment extends Fragment {
                             share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                             ctx.startActivity(Intent.createChooser(share, "Compartir receta…"));
                         } catch (IOException e) {
-                            // Fallback a texto si falla guardar imagen
+
                             shareDrinkText(ctx, drink);
                         }
                     }
                     @Override public void onLoadCleared(@androidx.annotation.Nullable Drawable placeholder) {}
                     @Override public void onLoadFailed(@androidx.annotation.Nullable Drawable errorDrawable) {
-                        // Fallback a texto si falla carga
+
                         shareDrinkText(ctx, drink);
                     }
                 });
