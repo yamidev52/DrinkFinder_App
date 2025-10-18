@@ -1,4 +1,4 @@
-package com.yamidev.drinkfinder;
+package com.yamidev.drinkfinder.api;
 
 import com.google.gson.annotations.SerializedName;
 

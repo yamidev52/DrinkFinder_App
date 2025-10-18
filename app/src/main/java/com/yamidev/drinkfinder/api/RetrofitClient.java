@@ -1,4 +1,4 @@
-package com.yamidev.drinkfinder;
+package com.yamidev.drinkfinder.api;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;

@@ -1,4 +1,4 @@
-package com.yamidev.drinkfinder;
+package com.yamidev.drinkfinder.drink;
 
 import android.widget.Filter;
 import android.widget.Filterable;

@@ -1,13 +1,11 @@
-package com.yamidev.drinkfinder;
+package com.yamidev.drinkfinder.drink;
 
 import androidx.annotation.Nullable;
 
-import com.yamidev.drinkfinder.DrinkMapper;
-import com.yamidev.drinkfinder.CocktailApi;
-import com.yamidev.drinkfinder.RetrofitClient;
-import com.yamidev.drinkfinder.ApiDrink;
-import com.yamidev.drinkfinder.DrinkResponse;
 import com.yamidev.drinkfinder.Drink;
+import com.yamidev.drinkfinder.api.ApiDrink;
+import com.yamidev.drinkfinder.api.CocktailApi;
+import com.yamidev.drinkfinder.api.RetrofitClient;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.yamidev.drinkfinder;
+package com.yamidev.drinkfinder.fragments;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -7,22 +7,28 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.yamidev.drinkfinder.DrinkRepository;
 import com.yamidev.drinkfinder.Drink;
-import com.yamidev.drinkfinder.DrinkAdapter;
+import com.yamidev.drinkfinder.R;
+import com.yamidev.drinkfinder.drink.DrinkAdapter;
+import com.yamidev.drinkfinder.drink.DrinkRepository;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class HomeFragment extends AppCompatActivity {
 
     private DrinkAdapter adapter;
     private DrinkRepository repo;
@@ -34,13 +40,28 @@ public class MainActivity extends AppCompatActivity {
     private String selectedCategory = "Todas";
     private String selectedAlcoholic = "Todos";
 
+    private ViewPager2 viewPager;
+    private TabLayout tabLayout;
+    private String[] tabTitles = new String[]{"Bebidas", "Buscar", "Favoritos"};
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Runnable pendingSearch;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.fragment_home);
+
+        viewPager = findViewById(R.id.viewPager);
+        tabLayout = findViewById(R.id.tabLayout);
+
+
+        new TabLayoutMediator(tabLayout, viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
+            @Override
+            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                tab.setText(tabTitles[position]);
+            }
+        }).attach();
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -120,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                 categoryAdapter.notifyDataSetChanged();
             }
             @Override public void onError(Throwable t) {
-                Toast.makeText(MainActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(HomeFragment.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -138,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                 adapter.applyFilter(currentQuery, selectedCategory, selectedAlcoholic);
             }
             @Override public void onError(Throwable t) {
-                Toast.makeText(MainActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(HomeFragment.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
