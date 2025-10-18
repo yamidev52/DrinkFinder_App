@@ -1,7 +1,7 @@
-package com.yamidev.drinkfinder;
+package com.yamidev.drinkfinder.drink;
 
-import com.yamidev.drinkfinder.ApiDrink;
 import com.yamidev.drinkfinder.Drink;
+import com.yamidev.drinkfinder.api.ApiDrink;
 
 import java.util.ArrayList;
 import java.util.List;

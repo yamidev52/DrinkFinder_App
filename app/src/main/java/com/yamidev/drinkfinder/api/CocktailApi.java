@@ -1,6 +1,6 @@
-package com.yamidev.drinkfinder;
+package com.yamidev.drinkfinder.api;
 
-import com.yamidev.drinkfinder.DrinkResponse;
+import com.yamidev.drinkfinder.drink.DrinkResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
