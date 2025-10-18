@@ -52,6 +52,14 @@
                 android:layout_marginTop="4dp" />
         </LinearLayout>
 
+        <ImageButton
+            android:id="@+id/btnShare"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/rounded_image_bg"
+            android:contentDescription="Share"
+            android:src="@drawable/compartir" />
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
