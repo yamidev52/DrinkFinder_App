@@ -9,4 +9,10 @@
         android:id="@+id/favoriteFragment"
     android:title="@string/favoritos"
     android:icon="@drawable/favorito" />
+
+    <item
+        android:id="@+id/action_sync"
+        android:title="@string/sincronizar"
+        android:icon="@drawable/ic_menu_sync" />
+
 </menu>

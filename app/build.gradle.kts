@@ -66,6 +66,10 @@ dependencies {
     implementation("androidx.room:room-runtime:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
 
+    // WorkManager
+    val work_version = "2.9.0"
+    implementation("androidx.work:work-runtime:$work_version")
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

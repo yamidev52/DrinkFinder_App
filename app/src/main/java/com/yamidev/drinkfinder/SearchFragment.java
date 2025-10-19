@@ -27,6 +27,8 @@ import androidx.lifecycle.Lifecycle;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -38,6 +40,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.yamidev.drinkfinder.drink.DrinkAdapter;
 import com.yamidev.drinkfinder.drink.DrinkRepository;
+import com.yamidev.drinkfinder.workers.SyncWorker;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -109,6 +112,12 @@ public class SearchFragment extends Fragment {
                     triggerRemoteSearch(randomDrink());
                     return true;
                 }
+
+                if (menuItem.getItemId() == R.id.action_sync) {
+                    triggerOnDemandSync();
+                    return true;
+                }
+
                 return false;
             }
         }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
@@ -305,5 +314,12 @@ public class SearchFragment extends Fragment {
                         shareDrinkText(ctx, drink);
                     }
                 });
+    }
+    private void triggerOnDemandSync() {
+        OneTimeWorkRequest syncRequest = new OneTimeWorkRequest.Builder(SyncWorker.class).build();
+
+        WorkManager.getInstance(requireContext()).enqueue(syncRequest);
+
+        Toast.makeText(requireContext(), "Sincronización iniciada...", Toast.LENGTH_SHORT).show();
     }
 }

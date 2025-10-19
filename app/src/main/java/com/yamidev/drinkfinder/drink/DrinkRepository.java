@@ -1,6 +1,8 @@
 package com.yamidev.drinkfinder.drink;
 
 import android.content.Context;
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
@@ -121,5 +123,17 @@ public class DrinkRepository {
             if (d != null) out.add(d);
         }
         return out;
+    }
+
+    public List<Drink> searchByNameSync(String name) {
+        try {
+            Response<DrinkResponse> response = api.searchByNameSync(name).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return mapList(response.body().drinks);
+            }
+        } catch (Exception e) {
+            Log.e("DrinkRepository", "Error en la búsqueda síncrona", e);
+        }
+        return new ArrayList<>();
     }
 }
