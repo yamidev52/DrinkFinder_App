@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/searchFragment">
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.yamidev.drinkfinder.SearchFragment"
+        android:label="Búsqueda"
+        tools:layout="@layout/fragment_search">
+        <action
+            android:id="@+id/action_search_to_detail"
+            app:destination="@id/detailFragment" />
+        <action
+            android:id="@+id/action_search_to_favorites"
+            app:destination="@id/favoriteFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/detailFragment"
+        android:name="com.yamidev.drinkfinder.DetailFragment"
+        android:label="Detalles"
+        tools:layout="@layout/fragment_detail">
+        <argument
+            android:name="drinkId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/favoriteFragment"
+        android:name="com.yamidev.drinkfinder.FavoriteFragment"
+        android:label="Favoritos"
+        tools:layout="@layout/fragment_favorites" >
+        <action
+            android:id="@+id/action_favorites_to_detail"
+            app:destination="@id/detailFragment" />
+        <action
+            android:id="@+id/action_favorites_to_search"
+            app:destination="@id/searchFragment" />
+    </fragment>
+
+</navigation>

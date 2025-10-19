@@ -9,6 +9,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -18,7 +21,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -60,6 +66,11 @@ public class SearchFragment extends Fragment {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Runnable pendingSearch;
 
+    public SearchFragment() {
+        super(R.layout.fragment_search);
+    }
+
+    /*
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -67,22 +78,55 @@ public class SearchFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_search, container, false);
     }
+    */
 
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-
 
         MaterialToolbar toolbar = v.findViewById(R.id.toolbar);
 
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
         activity.setSupportActionBar(toolbar);
 
+
+        requireActivity().addMenuProvider(new MenuProvider() {
+            @Override
+            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
+                menuInflater.inflate(R.menu.menu_home, menu);
+            }
+
+            @Override
+            public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
+
+                if (menuItem.getItemId() == R.id.favoriteFragment) {
+
+                    Navigation.findNavController(v).navigate(R.id.action_search_to_favorites);
+                    return true;
+                }
+                if (menuItem.getItemId() == R.id.searchFragment) {
+
+                    triggerRemoteSearch(randomDrink());
+                    return true;
+                }
+                return false;
+            }
+        }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+
         RecyclerView rv = v.findViewById(R.id.rvDrinks);
         adapter = new DrinkAdapter();
         rv.setAdapter(adapter);
 
-        repo = new DrinkRepository();
+        adapter.setOnItemClick(drink -> {
+            String drinkId = drink.getId();
+
+            Bundle bundle = new Bundle();
+            bundle.putString("drinkId", drinkId);
+
+            Navigation.findNavController(v).navigate(R.id.action_search_to_detail, bundle);
+        });
+
+        repo = new DrinkRepository(requireContext());
 
         // Spinners
         android.widget.Spinner spnCategory = v.findViewById(R.id.spnCategory);

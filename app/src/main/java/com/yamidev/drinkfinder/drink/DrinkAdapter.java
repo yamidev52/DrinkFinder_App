@@ -86,6 +86,13 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
         h.btnShare.setOnClickListener(v -> {
             shareDrinkWithImage(v.getContext(), d);
         });
+
+        h.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onClick(d);
+            }
+        });
+
     }
 
     @Override public int getItemCount() { return items.size(); }

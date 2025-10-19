@@ -14,8 +14,8 @@ public class PageAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        if (position == 0) return new SearchFragment();  // Tab 1
-        return new FavoriteFragment();                       // Tab 2
+        if (position == 0) return new SearchFragment();
+        return new FavoriteFragment();
     }
 
     @Override

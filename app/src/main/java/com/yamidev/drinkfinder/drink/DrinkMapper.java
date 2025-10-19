@@ -56,4 +56,40 @@ public class DrinkMapper {
     private static String safe(String s) {
         return s == null ? "" : s.trim();
     }
+
+    public static Drink entityToDomain(com.yamidev.drinkfinder.local.DrinkEntity entity) {
+        return new Drink(
+                entity.getId(),
+                entity.getName(),
+                entity.getCategory(),
+                entity.getAlcoholic(),
+                entity.getGlass(),
+                entity.getInstructions(),
+                entity.getThumbnail(),
+                entity.getIngredients()
+        );
+    }
+
+    public static List<Drink> entityListToDomainList(List<com.yamidev.drinkfinder.local.DrinkEntity> entityList) {
+        List<Drink> domainList = new ArrayList<>();
+        for (com.yamidev.drinkfinder.local.DrinkEntity entity : entityList) {
+            domainList.add(entityToDomain(entity));
+        }
+        return domainList;
+    }
+
+
+    public static com.yamidev.drinkfinder.local.DrinkEntity domainToEntity(Drink domainModel) {
+        return new com.yamidev.drinkfinder.local.DrinkEntity(
+                domainModel.getId(),
+                domainModel.getName(),
+                domainModel.getCategory(),
+                domainModel.getAlcoholic(),
+                domainModel.getGlass(),
+                domainModel.getInstructions(),
+                domainModel.getThumbnail(),
+                domainModel.getIngredients()
+        );
+    }
+
 }
