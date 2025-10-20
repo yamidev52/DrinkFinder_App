@@ -5,6 +5,7 @@ import com.yamidev.drinkfinder.drink.DrinkResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
+import retrofit2.Response;
 
 public interface CocktailApi {
 
@@ -22,5 +23,11 @@ public interface CocktailApi {
 
     // Listado de categorías
     @GET("list.php")
-    Call<DrinkResponse> listCategories(@Query("c") String listParam); // usar "list"
+    Call<DrinkResponse> listCategories(@Query("c") String listParam);
+
+    @GET("search.php")
+    Call<DrinkResponse> searchByNameSync(@Query("s") String name);
+
+    @GET("random.php")
+    Call<DrinkResponse> getRandomDrink();
 }

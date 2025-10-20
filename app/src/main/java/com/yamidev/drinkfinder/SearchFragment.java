@@ -1,26 +1,40 @@
 package com.yamidev.drinkfinder;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -32,6 +46,9 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.yamidev.drinkfinder.drink.DrinkAdapter;
 import com.yamidev.drinkfinder.drink.DrinkRepository;
+import com.yamidev.drinkfinder.services.UpdateService;
+import com.yamidev.drinkfinder.utils.NotificationHelper;
+import com.yamidev.drinkfinder.workers.SyncWorker;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -60,6 +77,20 @@ public class SearchFragment extends Fragment {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Runnable pendingSearch;
 
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    fetchRandomDrinkAndNotify();
+                } else {
+                    Toast.makeText(requireContext(), "Permiso de notificaciones denegado.", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+    public SearchFragment() {
+        super(R.layout.fragment_search);
+    }
+
+    /*
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -67,22 +98,77 @@ public class SearchFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_search, container, false);
     }
+    */
 
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-
 
         MaterialToolbar toolbar = v.findViewById(R.id.toolbar);
 
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
         activity.setSupportActionBar(toolbar);
 
+
+        requireActivity().addMenuProvider(new MenuProvider() {
+            @Override
+            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
+                menuInflater.inflate(R.menu.menu_home, menu);
+            }
+
+            @Override
+            public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
+
+                if (menuItem.getItemId() == R.id.favoriteFragment) {
+
+                    Navigation.findNavController(v).navigate(R.id.action_search_to_favorites);
+                    return true;
+                }
+                if (menuItem.getItemId() == R.id.searchFragment) {
+
+                    triggerRemoteSearch(randomDrink());
+                    return true;
+                }
+
+                if (menuItem.getItemId() == R.id.action_sync) {
+                    triggerOnDemandSync();
+                    return true;
+                }
+
+                if (menuItem.getItemId() == R.id.action_full_sync) {
+                    startUpdateService();
+                    return true;
+                }
+
+                if (menuItem.getItemId() == R.id.action_send_notification) {
+                    checkNotificationPermissionAndSend();
+                    return true;
+                }
+
+                return false;
+            }
+        }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+
         RecyclerView rv = v.findViewById(R.id.rvDrinks);
         adapter = new DrinkAdapter();
         rv.setAdapter(adapter);
 
-        repo = new DrinkRepository();
+        adapter.setOnItemClick(drink -> {
+            String drinkId = drink.getId();
+
+            Bundle bundle = new Bundle();
+            bundle.putString("drinkId", drinkId);
+
+            Navigation.findNavController(v).navigate(R.id.action_search_to_detail, bundle);
+        });
+
+        repo = new DrinkRepository(requireContext());
+
+        repo.getFavoriteDrinks().observe(getViewLifecycleOwner(), favoriteDrinks -> {
+            if (adapter != null) {
+                adapter.updateFavorites(favoriteDrinks);
+            }
+        });
 
         // Spinners
         android.widget.Spinner spnCategory = v.findViewById(R.id.spnCategory);
@@ -210,7 +296,6 @@ public class SearchFragment extends Fragment {
     }
 
     private String buildShareText(Drink d) {
-        // Ajusta los campos a tu modelo
         return "🍹 " + d.getName() + "\n" +
                 "Categoría: " + d.getCategory() + "\n" +
                 "Ingredientes:\n" + String.join("\n", d.getIngredients()) + "\n\n" +
@@ -262,4 +347,53 @@ public class SearchFragment extends Fragment {
                     }
                 });
     }
+    private void triggerOnDemandSync() {
+        OneTimeWorkRequest syncRequest = new OneTimeWorkRequest.Builder(SyncWorker.class).build();
+
+        WorkManager.getInstance(requireContext()).enqueue(syncRequest);
+
+        Toast.makeText(requireContext(), "Sincronización iniciada...", Toast.LENGTH_SHORT).show();
+    }
+
+    private void startUpdateService() {
+        Intent serviceIntent = new Intent(requireContext(), UpdateService.class);
+        requireContext().startForegroundService(serviceIntent);
+        Toast.makeText(requireContext(), "Iniciando actualización completa...", Toast.LENGTH_SHORT).show();
+    }
+
+    private void checkNotificationPermissionAndSend() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                fetchRandomDrinkAndNotify();
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        } else {
+            fetchRandomDrinkAndNotify();
+        }
+    }
+
+    private void fetchRandomDrinkAndNotify() {
+        repo.getRandomDrink(new DrinkRepository.Result<Drink>() {
+            @Override
+            public void onSuccess(Drink randomDrink) {
+                if (randomDrink != null && isAdded()) {
+                    NotificationHelper helper = new NotificationHelper(requireContext());
+                    helper.showDrinkNotification(randomDrink.getId(), randomDrink.getName());
+                    Toast.makeText(requireContext(), "Notificación enviada.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(requireContext(), "No se pudo obtener una bebida aleatoria.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                if(isAdded()) {
+                    Toast.makeText(requireContext(), "Error al obtener bebida: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+
 }

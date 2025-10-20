@@ -28,8 +28,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> implements Filterable {
 
@@ -45,7 +47,18 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
     private String category = "Todas";
     private String alcoholic = "Todos"; // Alcoholic, Non alcoholic, Optional alcohol, Todos
 
+    private final Set<String> favoriteDrinkIds = new HashSet<>();
+
     public void setOnItemClick(OnItemClick l) { this.listener = l; }
+
+    public void updateFavorites(List<Drink> favoriteDrinks) {
+        favoriteDrinkIds.clear();
+        for (Drink drink : favoriteDrinks) {
+            favoriteDrinkIds.add(drink.getId());
+        }
+
+        notifyDataSetChanged();
+    }
 
     public void setItems(List<Drink> newItems) {
         all.clear();
@@ -86,6 +99,19 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
         h.btnShare.setOnClickListener(v -> {
             shareDrinkWithImage(v.getContext(), d);
         });
+
+        if (favoriteDrinkIds.contains(d.getId())) {
+            h.btnFavorite.setImageResource(R.drawable.ic_favorite_filled);
+        } else {
+            h.btnFavorite.setImageResource(R.drawable.ic_favorite_border);
+        }
+
+        h.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onClick(d);
+            }
+        });
+
     }
 
     @Override public int getItemCount() { return items.size(); }
@@ -126,7 +152,7 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
     static class DrinkVH extends RecyclerView.ViewHolder {
         ImageView img;
         TextView tvName, tvCategory;
-        ImageButton btnShare;
+        ImageButton btnShare, btnFavorite;
 
         DrinkVH(@NonNull View itemView) {
             super(itemView);
@@ -134,6 +160,7 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
             tvName = itemView.findViewById(R.id.tvDrinkName);
             tvCategory = itemView.findViewById(R.id.tvDrinkCategory);
             btnShare = itemView.findViewById(R.id.btnShare);
+            btnFavorite = itemView.findViewById(R.id.btnFavoritos);
         }
     }
 
