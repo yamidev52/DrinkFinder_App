@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -40,6 +41,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.yamidev.drinkfinder.drink.DrinkAdapter;
 import com.yamidev.drinkfinder.drink.DrinkRepository;
+import com.yamidev.drinkfinder.services.UpdateService;
 import com.yamidev.drinkfinder.workers.SyncWorker;
 
 import java.io.File;
@@ -115,6 +117,11 @@ public class SearchFragment extends Fragment {
 
                 if (menuItem.getItemId() == R.id.action_sync) {
                     triggerOnDemandSync();
+                    return true;
+                }
+
+                if (menuItem.getItemId() == R.id.action_full_sync) {
+                    startUpdateService();
                     return true;
                 }
 
@@ -263,7 +270,6 @@ public class SearchFragment extends Fragment {
     }
 
     private String buildShareText(Drink d) {
-        // Ajusta los campos a tu modelo
         return "🍹 " + d.getName() + "\n" +
                 "Categoría: " + d.getCategory() + "\n" +
                 "Ingredientes:\n" + String.join("\n", d.getIngredients()) + "\n\n" +
@@ -322,4 +328,11 @@ public class SearchFragment extends Fragment {
 
         Toast.makeText(requireContext(), "Sincronización iniciada...", Toast.LENGTH_SHORT).show();
     }
+
+    private void startUpdateService() {
+        Intent serviceIntent = new Intent(requireContext(), UpdateService.class);
+        requireContext().startForegroundService(serviceIntent);
+        Toast.makeText(requireContext(), "Iniciando actualización completa...", Toast.LENGTH_SHORT).show();
+    }
+
 }

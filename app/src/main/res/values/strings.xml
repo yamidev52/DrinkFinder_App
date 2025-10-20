@@ -6,4 +6,5 @@
     <string name="inicio">Inicio</string>
     <string name="favoritos">Favoritos</string>
     <string name="sincronizar">Sincronizar</string>
+    <string name="actualizacion">Actualización Completa</string>
 </resources>

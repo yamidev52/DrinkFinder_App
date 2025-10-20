@@ -61,6 +61,7 @@ public class FavoriteFragment extends Fragment {
                     Navigation.findNavController(requireView()).navigate(R.id.action_favorites_to_search);
                     return true;
                 }
+
                 return false;
             }
         }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);

@@ -15,4 +15,8 @@
         android:title="@string/sincronizar"
         android:icon="@drawable/ic_menu_sync" />
 
+    <item
+        android:id="@+id/action_full_sync"
+        android:title="@string/actualizacion" />
+
 </menu>

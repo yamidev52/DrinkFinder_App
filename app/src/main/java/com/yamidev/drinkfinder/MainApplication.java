@@ -6,12 +6,19 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import com.yamidev.drinkfinder.workers.SyncWorker;
 import java.util.concurrent.TimeUnit;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.os.Build;
 
 public class MainApplication extends Application {
+
+    public static final String UPDATES_CHANNEL_ID = "updates_channel";
+
     @Override
     public void onCreate() {
         super.onCreate();
         schedulePeriodicSync();
+        createNotificationChannels();
     }
 
     private void schedulePeriodicSync() {
@@ -24,5 +31,18 @@ public class MainApplication extends Application {
                 ExistingPeriodicWorkPolicy.KEEP,
                 syncRequest
         );
+    }
+
+    private void createNotificationChannels() {
+        NotificationChannel updatesChannel = new NotificationChannel(
+                UPDATES_CHANNEL_ID,
+                "Actualizaciones de Datos",
+                NotificationManager.IMPORTANCE_LOW
+        );
+        updatesChannel.setDescription("Notificaciones para tareas de larga duración");
+
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        manager.createNotificationChannel(updatesChannel);
+
     }
 }
