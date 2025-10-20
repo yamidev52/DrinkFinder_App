@@ -1,7 +1,9 @@
 package com.yamidev.drinkfinder;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -19,9 +21,12 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
@@ -42,6 +47,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.yamidev.drinkfinder.drink.DrinkAdapter;
 import com.yamidev.drinkfinder.drink.DrinkRepository;
 import com.yamidev.drinkfinder.services.UpdateService;
+import com.yamidev.drinkfinder.utils.NotificationHelper;
 import com.yamidev.drinkfinder.workers.SyncWorker;
 
 import java.io.File;
@@ -70,6 +76,15 @@ public class SearchFragment extends Fragment {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Runnable pendingSearch;
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    fetchRandomDrinkAndNotify();
+                } else {
+                    Toast.makeText(requireContext(), "Permiso de notificaciones denegado.", Toast.LENGTH_SHORT).show();
+                }
+            });
 
     public SearchFragment() {
         super(R.layout.fragment_search);
@@ -125,6 +140,11 @@ public class SearchFragment extends Fragment {
                     return true;
                 }
 
+                if (menuItem.getItemId() == R.id.action_send_notification) {
+                    checkNotificationPermissionAndSend();
+                    return true;
+                }
+
                 return false;
             }
         }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
@@ -143,6 +163,12 @@ public class SearchFragment extends Fragment {
         });
 
         repo = new DrinkRepository(requireContext());
+
+        repo.getFavoriteDrinks().observe(getViewLifecycleOwner(), favoriteDrinks -> {
+            if (adapter != null) {
+                adapter.updateFavorites(favoriteDrinks);
+            }
+        });
 
         // Spinners
         android.widget.Spinner spnCategory = v.findViewById(R.id.spnCategory);
@@ -334,5 +360,40 @@ public class SearchFragment extends Fragment {
         requireContext().startForegroundService(serviceIntent);
         Toast.makeText(requireContext(), "Iniciando actualización completa...", Toast.LENGTH_SHORT).show();
     }
+
+    private void checkNotificationPermissionAndSend() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                fetchRandomDrinkAndNotify();
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        } else {
+            fetchRandomDrinkAndNotify();
+        }
+    }
+
+    private void fetchRandomDrinkAndNotify() {
+        repo.getRandomDrink(new DrinkRepository.Result<Drink>() {
+            @Override
+            public void onSuccess(Drink randomDrink) {
+                if (randomDrink != null && isAdded()) {
+                    NotificationHelper helper = new NotificationHelper(requireContext());
+                    helper.showDrinkNotification(randomDrink.getId(), randomDrink.getName());
+                    Toast.makeText(requireContext(), "Notificación enviada.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(requireContext(), "No se pudo obtener una bebida aleatoria.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                if(isAdded()) {
+                    Toast.makeText(requireContext(), "Error al obtener bebida: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
 
 }

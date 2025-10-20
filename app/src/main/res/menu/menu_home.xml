@@ -19,4 +19,8 @@
         android:id="@+id/action_full_sync"
         android:title="@string/actualizacion" />
 
+    <item
+        android:id="@+id/action_send_notification"
+        android:title="Enviar Notificación (Test)" />
+
 </menu>

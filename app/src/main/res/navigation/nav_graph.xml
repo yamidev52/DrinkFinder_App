@@ -27,6 +27,9 @@
         <argument
             android:name="drinkId"
             app:argType="string" />
+        <deepLink
+            android:id="@+id/deepLink"
+            app:uri="pp://drinkfinder.com/drink/{drinkId}" />
     </fragment>
 
     <fragment

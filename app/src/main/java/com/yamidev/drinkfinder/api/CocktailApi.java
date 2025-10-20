@@ -27,4 +27,7 @@ public interface CocktailApi {
 
     @GET("search.php")
     Call<DrinkResponse> searchByNameSync(@Query("s") String name);
+
+    @GET("random.php")
+    Call<DrinkResponse> getRandomDrink();
 }

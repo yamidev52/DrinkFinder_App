@@ -136,4 +136,23 @@ public class DrinkRepository {
         }
         return new ArrayList<>();
     }
+
+    public void getRandomDrink(Result<Drink> cb) {
+        api.getRandomDrink().enqueue(new Callback<DrinkResponse>() {
+            @Override
+            public void onResponse(Call<DrinkResponse> call, Response<DrinkResponse> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().drinks.isEmpty()) {
+                    Drink randomDrink = DrinkMapper.toDomain(response.body().drinks.get(0));
+                    cb.onSuccess(randomDrink);
+                } else {
+                    cb.onSuccess(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DrinkResponse> call, Throwable t) {
+                cb.onError(t);
+            }
+        });
+    }
 }
