@@ -7,4 +7,9 @@
     <string name="favoritos">Favoritos</string>
     <string name="sincronizar">Sincronizar</string>
     <string name="actualizacion">Actualización Completa</string>
+    <string name="login_title">Bienvenido a DrinkFinder</string>
+    <string name="tf_email">Correo Electrónico</string>
+    <string name="tf_password">Contraseña</string>
+    <string name="tv_signup">¿No tienes cuenta? Regístrate aquí</string>
+    <string name="btn_signin">Iniciar Sesión</string>
 </resources>
