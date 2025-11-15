@@ -12,4 +12,10 @@
     <string name="tf_password">Contraseña</string>
     <string name="tv_signup">¿No tienes cuenta? Regístrate aquí</string>
     <string name="btn_signin">Iniciar Sesión</string>
+    <string name="title_signup">Crear Nueva Cuenta</string>
+    <string name="tf_confirm_password">Confirmar Contraseña</string>
+    <string name="btn_register">Registrarse</string>
+    <string name="tv_signin">¿Ya tienes cuenta? Inicia sesión aquí</string>
+    <string name="item_logout">Cerrar Sesión</string>
+    <string name="item_notificationtest">Enviar Notificación (Test)</string>
 </resources>

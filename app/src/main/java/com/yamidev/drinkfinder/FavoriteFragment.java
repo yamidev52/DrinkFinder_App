@@ -1,12 +1,14 @@
 package com.yamidev.drinkfinder;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
+import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -62,6 +64,11 @@ public class FavoriteFragment extends Fragment {
                     return true;
                 }
 
+                if (menuItem.getItemId() == R.id.action_logout) {
+                    handleLogout();
+                    return true;
+                }
+
                 return false;
             }
         }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
@@ -77,4 +84,16 @@ public class FavoriteFragment extends Fragment {
             adapter.setItems(favoriteDrinks);
         });
     }
+
+    private void handleLogout() {
+        SharedPreferences prefs = requireActivity().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE);
+        prefs.edit().clear().apply();
+
+        Intent intent = new Intent(requireActivity(), AuthActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        startActivity(intent);
+        requireActivity().finish();
+    }
+
 }

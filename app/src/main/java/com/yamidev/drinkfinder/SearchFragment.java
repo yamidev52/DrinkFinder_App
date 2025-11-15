@@ -3,6 +3,7 @@ package com.yamidev.drinkfinder;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -142,6 +143,11 @@ public class SearchFragment extends Fragment {
 
                 if (menuItem.getItemId() == R.id.action_send_notification) {
                     checkNotificationPermissionAndSend();
+                    return true;
+                }
+
+                if (menuItem.getItemId() == R.id.action_logout) {
+                    handleLogout();
                     return true;
                 }
 
@@ -393,6 +399,20 @@ public class SearchFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void handleLogout() {
+
+        SharedPreferences prefs = requireActivity().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE);
+        prefs.edit().clear().apply();
+
+
+        Intent intent = new Intent(requireActivity(), AuthActivity.class);
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        startActivity(intent);
+        requireActivity().finish();
     }
 
 

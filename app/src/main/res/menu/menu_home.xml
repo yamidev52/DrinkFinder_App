@@ -21,6 +21,11 @@
 
     <item
         android:id="@+id/action_send_notification"
-        android:title="Enviar Notificación (Test)" />
+        android:title="@string/item_notificationtest" />
+
+    <item
+        android:id="@+id/action_logout"
+        android:title="@string/item_logout"
+        android:icon="@android:drawable/ic_lock_power_off" />
 
 </menu>
