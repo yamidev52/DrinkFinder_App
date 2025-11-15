@@ -18,4 +18,13 @@
     <string name="tv_signin">¿Ya tienes cuenta? Inicia sesión aquí</string>
     <string name="item_logout">Cerrar Sesión</string>
     <string name="item_notificationtest">Enviar Notificación (Test)</string>
+    <string name="title_commentaries">Comentarios</string>
+    <string name="et_commentary">Escribe un comentario...</string>
+    <string name="ib_commentary">Enviar Comentario</string>
+    <string name="fb_share">Floating share button</string>
+    <string name="fb_fav">Floating fav button</string>
+    <string name="tv_instructions">Instrucciones</string>
+    <string name="tv_ingredients">Ingredientes</string>
+    <string name="tv_authorname">Nombre del Autor</string>
+    <string name="tv_commenttext">Este es el texto del comentario que puede ser un poco largo.</string>
 </resources>

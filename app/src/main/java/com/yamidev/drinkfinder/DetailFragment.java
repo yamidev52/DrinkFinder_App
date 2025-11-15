@@ -7,14 +7,12 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.lifecycle.Observer;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,48 +22,41 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-
+import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.yamidev.drinkfinder.drink.CommentAdapter;
 import com.yamidev.drinkfinder.drink.DrinkRepository;
-
+import com.yamidev.drinkfinder.model.Comment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
 
 public class DetailFragment extends Fragment {
-
 
     private ImageView imgDrinkDetail;
     private TextView tvCategoryDetail, tvInstructionsDetail, tvIngredientsDetail;
     private CollapsingToolbarLayout collapsingToolbar;
     private FloatingActionButton fabShare, fabFavorite;
-    private boolean isCurrentlyFavorite = false;
-
+    private RecyclerView rvComments;
+    private CommentAdapter commentAdapter;
+    private EditText etNewComment;
+    private ImageButton btnSendComment;
 
     private DrinkRepository repo;
     private Drink currentDrink;
+    private boolean isCurrentlyFavorite = false;
 
     public DetailFragment() {
         super(R.layout.fragment_detail);
     }
 
-    /*
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_detail, container, false);
-    }
-     */
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
 
         imgDrinkDetail = view.findViewById(R.id.img_drink_detail);
         tvCategoryDetail = view.findViewById(R.id.tv_category_detail);
@@ -74,8 +65,13 @@ public class DetailFragment extends Fragment {
         collapsingToolbar = view.findViewById(R.id.collapsing_toolbar);
         fabShare = view.findViewById(R.id.fab_share);
         fabFavorite = view.findViewById(R.id.fab_favorite);
+        rvComments = view.findViewById(R.id.rv_comments);
+        etNewComment = view.findViewById(R.id.et_new_comment);
+        btnSendComment = view.findViewById(R.id.btn_send_comment);
 
         repo = new DrinkRepository(requireContext());
+        commentAdapter = new CommentAdapter();
+        rvComments.setAdapter(commentAdapter);
 
         Toolbar toolbar = view.findViewById(R.id.toolbar_detail);
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
@@ -90,6 +86,8 @@ public class DetailFragment extends Fragment {
             if (drinkId != null && !drinkId.isEmpty()) {
                 fetchDrinkDetails(drinkId);
                 observeFavoriteStatus(drinkId);
+                observeComments(drinkId);
+                btnSendComment.setOnClickListener(v -> handleSendComment(drinkId));
             } else {
                 showError("No se recibió un ID de bebida.");
             }
@@ -110,6 +108,25 @@ public class DetailFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void observeComments(String drinkId) {
+        repo.getCommentsForDrink(drinkId).observe(getViewLifecycleOwner(), comments -> {
+            if (isAdded()) {
+                commentAdapter.setComments(comments);
+            }
+        });
+    }
+
+    private void handleSendComment(String drinkId) {
+        String commentText = etNewComment.getText().toString().trim();
+        if (commentText.isEmpty()) {
+            Toast.makeText(requireContext(), "El comentario no puede estar vacío", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Comment newComment = new Comment("Tú (Frontend)", commentText);
+        repo.addCommentForDrink(drinkId, newComment);
+        etNewComment.setText("");
     }
 
     private void fetchDrinkDetails(String id) {
@@ -147,7 +164,6 @@ public class DetailFragment extends Fragment {
         tvCategoryDetail.setText(drink.getCategory());
         tvInstructionsDetail.setText(drink.getInstructions());
 
-
         StringBuilder ingredientsText = new StringBuilder();
         for (String ingredient : drink.getIngredients()) {
             ingredientsText.append("• ").append(ingredient).append("\n");
@@ -165,8 +181,6 @@ public class DetailFragment extends Fragment {
         }
         Log.e("DetailFragment", message);
     }
-
-
 
     private void shareDrinkWithImage(Context ctx, Drink drink) {
         String body = buildShareText(drink);
