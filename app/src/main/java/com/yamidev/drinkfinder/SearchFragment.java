@@ -3,6 +3,7 @@ package com.yamidev.drinkfinder;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -11,12 +12,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
@@ -47,7 +46,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.yamidev.drinkfinder.drink.DrinkAdapter;
 import com.yamidev.drinkfinder.drink.DrinkRepository;
 import com.yamidev.drinkfinder.services.UpdateService;
-import com.yamidev.drinkfinder.utils.NotificationHelper;
 import com.yamidev.drinkfinder.workers.SyncWorker;
 
 import java.io.File;
@@ -129,7 +127,11 @@ public class SearchFragment extends Fragment {
                     triggerRemoteSearch(randomDrink());
                     return true;
                 }
+                if (menuItem.getItemId() == R.id.mapFragment) {
 
+                    Navigation.findNavController(requireView()).navigate(R.id.action_search_to_map);
+                    return true;
+                }
                 if (menuItem.getItemId() == R.id.action_sync) {
                     triggerOnDemandSync();
                     return true;
@@ -140,8 +142,9 @@ public class SearchFragment extends Fragment {
                     return true;
                 }
 
-                if (menuItem.getItemId() == R.id.action_send_notification) {
-                    checkNotificationPermissionAndSend();
+
+                if (menuItem.getItemId() == R.id.action_logout) {
+                    handleLogout();
                     return true;
                 }
 
@@ -378,8 +381,6 @@ public class SearchFragment extends Fragment {
             @Override
             public void onSuccess(Drink randomDrink) {
                 if (randomDrink != null && isAdded()) {
-                    NotificationHelper helper = new NotificationHelper(requireContext());
-                    helper.showDrinkNotification(randomDrink.getId(), randomDrink.getName());
                     Toast.makeText(requireContext(), "Notificación enviada.", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(requireContext(), "No se pudo obtener una bebida aleatoria.", Toast.LENGTH_SHORT).show();
@@ -393,6 +394,20 @@ public class SearchFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void handleLogout() {
+
+        SharedPreferences prefs = requireActivity().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE);
+        prefs.edit().clear().apply();
+
+
+        Intent intent = new Intent(requireActivity(), AuthActivity.class);
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        startActivity(intent);
+        requireActivity().finish();
     }
 
 

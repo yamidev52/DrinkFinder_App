@@ -6,6 +6,8 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
+import com.yamidev.drinkfinder.auth.UserDAO;
+
 @Database(entities = {DrinkEntity.class}, version = 1, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
@@ -24,4 +26,6 @@ public abstract class AppDatabase extends RoomDatabase {
         }
         return INSTANCE;
     }
+
+    public abstract UserDAO userDAO();
 }

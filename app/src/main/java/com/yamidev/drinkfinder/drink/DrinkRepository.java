@@ -13,6 +13,9 @@ import com.yamidev.drinkfinder.api.RetrofitClient;
 import com.yamidev.drinkfinder.local.AppDatabase;
 import com.yamidev.drinkfinder.local.DrinkDao;
 import com.yamidev.drinkfinder.local.DrinkEntity;
+
+import com.yamidev.drinkfinder.model.Comment;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -155,4 +158,18 @@ public class DrinkRepository {
             }
         });
     }
+
+    public LiveData<List<Comment>> getCommentsForDrink(String drinkId) {
+        // Aqui va tu parte dell backend @Yamil
+        return new androidx.lifecycle.MutableLiveData<>(new ArrayList<>());
+    }
+
+    public void addCommentForDrink(String drinkId, Comment comment) {
+        // Aqui va la logica del DAO para insertar @Yamil.
+        executor.execute(() -> {
+            // Lógica de inserción del DAO irá aquí.
+            Log.d("Repo-Comments", "Simulando inserción de comentario para la bebida: " + drinkId);
+        });
+    }
+
 }

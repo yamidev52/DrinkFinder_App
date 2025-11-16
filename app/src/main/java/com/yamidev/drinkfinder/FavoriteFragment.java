@@ -1,12 +1,14 @@
 package com.yamidev.drinkfinder;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
+import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -56,9 +58,19 @@ public class FavoriteFragment extends Fragment {
                     Toast.makeText(requireContext(), "Ya estás en Favoritos", Toast.LENGTH_SHORT).show();
                     return true;
                 }
+                if (menuItem.getItemId() == R.id.mapFragment) {
+
+                    Navigation.findNavController(requireView()).navigate(R.id.action_search_to_map);
+                    return true;
+                }
                 if (menuItem.getItemId() == R.id.searchFragment) {
 
                     Navigation.findNavController(requireView()).navigate(R.id.action_favorites_to_search);
+                    return true;
+                }
+
+                if (menuItem.getItemId() == R.id.action_logout) {
+                    handleLogout();
                     return true;
                 }
 
@@ -77,4 +89,16 @@ public class FavoriteFragment extends Fragment {
             adapter.setItems(favoriteDrinks);
         });
     }
+
+    private void handleLogout() {
+        SharedPreferences prefs = requireActivity().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE);
+        prefs.edit().clear().apply();
+
+        Intent intent = new Intent(requireActivity(), AuthActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        startActivity(intent);
+        requireActivity().finish();
+    }
+
 }
