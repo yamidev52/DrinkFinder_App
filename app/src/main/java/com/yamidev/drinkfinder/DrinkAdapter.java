@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.yamidev.drinkfinder.R;
-import com.yamidev.drinkfinder.Drink;
+import com.yamidev.drinkfinder.  Drink;
 
 import java.util.ArrayList;
 import java.util.List;

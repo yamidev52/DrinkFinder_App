@@ -15,7 +15,6 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.yamidev.drinkfinder.auth.FakeAuthService;
 
 public class LoginFragment extends Fragment {
 
