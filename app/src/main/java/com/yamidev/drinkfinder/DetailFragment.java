@@ -1,7 +1,9 @@
 package com.yamidev.drinkfinder;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -13,10 +15,16 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.util.ArrayList;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -30,10 +38,13 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.yamidev.drinkfinder.drink.CommentAdapter;
 import com.yamidev.drinkfinder.drink.DrinkRepository;
+import com.yamidev.drinkfinder.drink.ImagePreviewAdapter;
 import com.yamidev.drinkfinder.model.Comment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class DetailFragment extends Fragment {
 
@@ -49,9 +60,23 @@ public class DetailFragment extends Fragment {
     private DrinkRepository repo;
     private Drink currentDrink;
     private boolean isCurrentlyFavorite = false;
+    private RecyclerView rvImagePreviews;
+    private ImagePreviewAdapter imagePreviewAdapter;
+    private ImageButton btnAttachPhoto;
+    private Uri tempImageUri;
+
+    private ActivityResultLauncher<String> requestCameraPermissionLauncher;
+    private ActivityResultLauncher<Uri> takePictureLauncher;
+    private ActivityResultLauncher<String> pickImageLauncher;
 
     public DetailFragment() {
         super(R.layout.fragment_detail);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setupActivityLaunchers();
     }
 
     @Override
@@ -68,6 +93,13 @@ public class DetailFragment extends Fragment {
         rvComments = view.findViewById(R.id.rv_comments);
         etNewComment = view.findViewById(R.id.et_new_comment);
         btnSendComment = view.findViewById(R.id.btn_send_comment);
+
+        rvImagePreviews = view.findViewById(R.id.rv_image_previews);
+        btnAttachPhoto = view.findViewById(R.id.btn_attach_photo);
+
+        setupImagePreview();
+
+        btnAttachPhoto.setOnClickListener(v -> showImageSourceDialog());
 
         repo = new DrinkRepository(requireContext());
         commentAdapter = new CommentAdapter();
@@ -124,9 +156,18 @@ public class DetailFragment extends Fragment {
             Toast.makeText(requireContext(), "El comentario no puede estar vacío", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        List<String> imageUrls = imagePreviewAdapter.getImageUris().stream()
+                .map(Uri::toString)
+                .collect(Collectors.toCollection(ArrayList::new));
+
         Comment newComment = new Comment("Tú (Frontend)", commentText);
         repo.addCommentForDrink(drinkId, newComment);
         etNewComment.setText("");
+        while(imagePreviewAdapter.getItemCount() > 0) {
+            imagePreviewAdapter.removeImage(0);
+        }
+        rvImagePreviews.setVisibility(View.GONE);
     }
 
     private void fetchDrinkDetails(String id) {
@@ -238,4 +279,76 @@ public class DetailFragment extends Fragment {
                 ctx, ctx.getPackageName() + ".fileprovider", file
         );
     }
+
+    private void setupActivityLaunchers() {
+        // Launcher para pedir permiso de cámara
+        requestCameraPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted) {
+                launchCamera();
+            } else {
+                Toast.makeText(requireContext(), "Permiso de cámara denegado", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Launcher para tomar una foto
+        takePictureLauncher = registerForActivityResult(new ActivityResultContracts.TakePicture(), isSuccess -> {
+            if (isSuccess && tempImageUri != null) {
+                addImageToPreview(tempImageUri);
+            }
+        });
+
+        // Launcher para seleccionar de la galería
+        pickImageLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+            if (uri != null) {
+                addImageToPreview(uri);
+            }
+        });
+    }
+
+    private void setupImagePreview() {
+        imagePreviewAdapter = new ImagePreviewAdapter();
+        rvImagePreviews.setAdapter(imagePreviewAdapter);
+        imagePreviewAdapter.setOnImageRemoveListener(position -> {
+            imagePreviewAdapter.removeImage(position);
+            rvImagePreviews.setVisibility(imagePreviewAdapter.getItemCount() > 0 ? View.VISIBLE : View.GONE);
+        });
+    }
+
+    private void showImageSourceDialog() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Adjuntar Imagen")
+                .setItems(new CharSequence[]{"Tomar Foto", "Elegir de Galería"}, (dialog, which) -> {
+                    if (which == 0) {
+                        checkCameraPermissionAndLaunch();
+                    } else {
+                        pickImageLauncher.launch("image/*");
+                    }
+                }).show();
+    }
+
+    private void checkCameraPermissionAndLaunch() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            launchCamera();
+        } else {
+            requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    private void launchCamera() {
+        File tempImageFile = new File(requireContext().getCacheDir(), "temp_image.jpg");
+        tempImageUri = FileProvider.getUriForFile(requireContext(), requireContext().getPackageName() + ".fileprovider", tempImageFile);
+        takePictureLauncher.launch(tempImageUri);
+    }
+
+    private void addImageToPreview(Uri uri) {
+        if (imagePreviewAdapter.getItemCount() < 3) {
+            imagePreviewAdapter.addImage(uri);
+            rvImagePreviews.setVisibility(View.VISIBLE);
+        } else {
+            Toast.makeText(requireContext(), "Puedes adjuntar hasta 3 imágenes", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
 }

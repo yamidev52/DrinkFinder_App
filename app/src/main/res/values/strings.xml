@@ -27,4 +27,7 @@
     <string name="tv_ingredients">Ingredientes</string>
     <string name="tv_authorname">Nombre del Autor</string>
     <string name="tv_commenttext">Este es el texto del comentario que puede ser un poco largo.</string>
+    <string name="iv_content">Image content</string>
+    <string name="ib_rbcontent">Remove button</string>
+    <string name="iv_attachpicdescription">Adjuntar Foto</string>
 </resources>

@@ -137,6 +137,22 @@
         app:layout_anchorGravity="start|center_vertical"
         android:layout_marginStart="-88dp" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_image_previews"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="64dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:clipToPadding="false"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:itemCount="3"
+        tools:listitem="@layout/item_image_preview"/>
+
     <LinearLayout
         android:id="@+id/comment_input_layout"
         android:layout_width="match_parent"
@@ -146,6 +162,14 @@
         android:layout_gravity="bottom"
         android:background="?android:attr/colorBackground"
         android:padding="8dp">
+
+        <ImageButton
+            android:id="@+id/btn_attach_photo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@android:drawable/ic_menu_camera"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/iv_attachpicdescription"/>
 
         <EditText
             android:id="@+id/et_new_comment"
