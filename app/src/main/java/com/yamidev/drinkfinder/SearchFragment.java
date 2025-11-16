@@ -130,7 +130,11 @@ public class SearchFragment extends Fragment {
                     triggerRemoteSearch(randomDrink());
                     return true;
                 }
+                if (menuItem.getItemId() == R.id.mapFragment) {
 
+                    Navigation.findNavController(requireView()).navigate(R.id.action_search_to_map);
+                    return true;
+                }
                 if (menuItem.getItemId() == R.id.action_sync) {
                     triggerOnDemandSync();
                     return true;

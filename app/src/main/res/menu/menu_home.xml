@@ -20,6 +20,11 @@
         android:title="@string/actualizacion" />
 
     <item
+        android:id="@+id/mapFragment"
+        android:title="@string/item_map"
+        android:icon="@android:drawable/ic_dialog_map" />
+
+    <item
         android:id="@+id/action_send_notification"
         android:title="@string/item_notificationtest" />
 
@@ -27,5 +32,6 @@
         android:id="@+id/action_logout"
         android:title="@string/item_logout"
         android:icon="@android:drawable/ic_lock_power_off" />
+
 
 </menu>
