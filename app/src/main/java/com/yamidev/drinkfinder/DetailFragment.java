@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -35,11 +36,14 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.yamidev.drinkfinder.drink.CommentAdapter;
 import com.yamidev.drinkfinder.drink.DrinkRepository;
 import com.yamidev.drinkfinder.drink.ImagePreviewAdapter;
 import com.yamidev.drinkfinder.model.Comment;
+import com.yamidev.drinkfinder.utils.AppNotifier;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -69,6 +73,18 @@ public class DetailFragment extends Fragment {
     private ActivityResultLauncher<Uri> takePictureLauncher;
     private ActivityResultLauncher<String> pickImageLauncher;
 
+    private MaterialButton btnRemindLater;
+    private AppNotifier appNotifier;
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    sendDrinkNotification();
+                } else {
+                    Toast.makeText(requireContext(), "Permiso de notificaciones denegado.", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+
     public DetailFragment() {
         super(R.layout.fragment_detail);
     }
@@ -96,6 +112,13 @@ public class DetailFragment extends Fragment {
 
         rvImagePreviews = view.findViewById(R.id.rv_image_previews);
         btnAttachPhoto = view.findViewById(R.id.btn_attach_photo);
+
+        appNotifier = new AppNotifier(requireContext());
+        btnRemindLater = view.findViewById(R.id.btn_remind_later);
+
+        btnRemindLater.setOnClickListener(v -> {
+            checkNotificationPermissionAndSend();
+        });
 
         setupImagePreview();
 
@@ -349,6 +372,25 @@ public class DetailFragment extends Fragment {
         }
     }
 
+    private void checkNotificationPermissionAndSend() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED) {
+                sendDrinkNotification();
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        } else {
+            sendDrinkNotification();
+        }
+    }
 
+    private void sendDrinkNotification() {
+        if (currentDrink != null) {
+            appNotifier.showDrinkOfferNotification(currentDrink.getId(), currentDrink.getName());
+        } else {
+            Toast.makeText(requireContext(), "No se puede crear el recordatorio.", Toast.LENGTH_SHORT).show();
+        }
+    }
 
 }

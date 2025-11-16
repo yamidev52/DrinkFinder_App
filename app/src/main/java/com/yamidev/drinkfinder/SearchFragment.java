@@ -12,12 +12,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
@@ -48,7 +46,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.yamidev.drinkfinder.drink.DrinkAdapter;
 import com.yamidev.drinkfinder.drink.DrinkRepository;
 import com.yamidev.drinkfinder.services.UpdateService;
-import com.yamidev.drinkfinder.utils.NotificationHelper;
 import com.yamidev.drinkfinder.workers.SyncWorker;
 
 import java.io.File;
@@ -145,10 +142,6 @@ public class SearchFragment extends Fragment {
                     return true;
                 }
 
-                if (menuItem.getItemId() == R.id.action_send_notification) {
-                    checkNotificationPermissionAndSend();
-                    return true;
-                }
 
                 if (menuItem.getItemId() == R.id.action_logout) {
                     handleLogout();
@@ -388,8 +381,6 @@ public class SearchFragment extends Fragment {
             @Override
             public void onSuccess(Drink randomDrink) {
                 if (randomDrink != null && isAdded()) {
-                    NotificationHelper helper = new NotificationHelper(requireContext());
-                    helper.showDrinkNotification(randomDrink.getId(), randomDrink.getName());
                     Toast.makeText(requireContext(), "Notificación enviada.", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(requireContext(), "No se pudo obtener una bebida aleatoria.", Toast.LENGTH_SHORT).show();

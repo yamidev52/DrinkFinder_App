@@ -24,9 +24,6 @@
         android:title="@string/item_map"
         android:icon="@android:drawable/ic_dialog_map" />
 
-    <item
-        android:id="@+id/action_send_notification"
-        android:title="@string/item_notificationtest" />
 
     <item
         android:id="@+id/action_logout"

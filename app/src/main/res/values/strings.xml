@@ -31,4 +31,5 @@
     <string name="ib_rbcontent">Remove button</string>
     <string name="iv_attachpicdescription">Adjuntar Foto</string>
     <string name="item_map">Mapa</string>
+    <string name="btn_remindmelater">Recordarme más tarde</string>
 </resources>
