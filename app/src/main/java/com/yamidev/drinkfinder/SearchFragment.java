@@ -55,7 +55,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SearchFragment extends Fragment {
+import com.yamidev.drinkfinder.sensors.ShakeDetector;
+import java.util.Collections;
+
+public class SearchFragment extends Fragment implements ShakeDetector.OnShakeListener {
 
     private DrinkAdapter adapter;
     private DrinkRepository repo;
@@ -83,20 +86,12 @@ public class SearchFragment extends Fragment {
                     Toast.makeText(requireContext(), "Permiso de notificaciones denegado.", Toast.LENGTH_SHORT).show();
                 }
             });
+    private ShakeDetector shakeDetector;
 
     public SearchFragment() {
         super(R.layout.fragment_search);
     }
 
-    /*
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_search, container, false);
-    }
-    */
 
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
@@ -107,6 +102,7 @@ public class SearchFragment extends Fragment {
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
         activity.setSupportActionBar(toolbar);
 
+        shakeDetector = new ShakeDetector(requireContext(), this);
 
         requireActivity().addMenuProvider(new MenuProvider() {
             @Override
@@ -142,11 +138,19 @@ public class SearchFragment extends Fragment {
                     return true;
                 }
 
+                if (menuItem.getItemId() == R.id.action_simulate_shake) {
+                    if (shakeDetector != null) {
+                        shakeDetector.simulateShake();
+                    }
+                    return true;
+                }
 
                 if (menuItem.getItemId() == R.id.action_logout) {
                     handleLogout();
                     return true;
                 }
+
+
 
                 return false;
             }
@@ -410,5 +414,37 @@ public class SearchFragment extends Fragment {
         requireActivity().finish();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        shakeDetector.startListening();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        shakeDetector.stopListening();
+    }
+
+    @Override
+    public void onShake() {
+        Toast.makeText(requireContext(), "¡Buscando bebida aleatoria!", Toast.LENGTH_SHORT).show();
+        repo.getRandomDrink(new DrinkRepository.Result<Drink>() {
+            @Override
+            public void onSuccess(Drink randomDrink) {
+                if (randomDrink != null && isAdded()) {
+                    adapter.setItems(Collections.singletonList(randomDrink));
+                } else {
+                    Toast.makeText(requireContext(), "No se pudo obtener una bebida aleatoria.", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onError(Throwable t) {
+                if(isAdded()) {
+                    Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
 
 }
