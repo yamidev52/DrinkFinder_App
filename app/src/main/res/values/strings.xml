@@ -12,4 +12,24 @@
     <string name="tf_password">Contraseña</string>
     <string name="tv_signup">¿No tienes cuenta? Regístrate aquí</string>
     <string name="btn_signin">Iniciar Sesión</string>
+    <string name="title_signup">Crear Nueva Cuenta</string>
+    <string name="tf_confirm_password">Confirmar Contraseña</string>
+    <string name="btn_register">Registrarse</string>
+    <string name="tv_signin">¿Ya tienes cuenta? Inicia sesión aquí</string>
+    <string name="item_logout">Cerrar Sesión</string>
+    <string name="item_notificationtest">Enviar Notificación (Test)</string>
+    <string name="title_commentaries">Comentarios</string>
+    <string name="et_commentary">Escribe un comentario...</string>
+    <string name="ib_commentary">Enviar Comentario</string>
+    <string name="fb_share">Floating share button</string>
+    <string name="fb_fav">Floating fav button</string>
+    <string name="tv_instructions">Instrucciones</string>
+    <string name="tv_ingredients">Ingredientes</string>
+    <string name="tv_authorname">Nombre del Autor</string>
+    <string name="tv_commenttext">Este es el texto del comentario que puede ser un poco largo.</string>
+    <string name="iv_content">Image content</string>
+    <string name="ib_rbcontent">Remove button</string>
+    <string name="iv_attachpicdescription">Adjuntar Foto</string>
+    <string name="item_map">Mapa</string>
+    <string name="btn_remindmelater">Recordarme más tarde</string>
 </resources>

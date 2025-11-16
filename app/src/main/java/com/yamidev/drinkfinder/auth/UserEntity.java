@@ -1,6 +1,7 @@
 package com.yamidev.drinkfinder.auth;
 
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -16,9 +17,6 @@ public class UserEntity {
     @NonNull
     public String password;
 
-    /**
-     * Campo para persistir la sesión.
-     * Solo un usuario debe tener isLoggedIn = true.
-     */
+    @ColumnInfo(name = "isLoggedIn")
     public boolean isLoggedIn;
 }
