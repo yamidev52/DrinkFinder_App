@@ -30,6 +30,7 @@ import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.FragmentNavigator;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import androidx.work.OneTimeWorkRequest;
@@ -160,13 +161,32 @@ public class SearchFragment extends Fragment implements ShakeDetector.OnShakeLis
         adapter = new DrinkAdapter();
         rv.setAdapter(adapter);
 
-        adapter.setOnItemClick(drink -> {
-            String drinkId = drink.getId();
+        adapter.setOnItemClick(new DrinkAdapter.OnItemClick() {
+            @Override
+            public void onClick(Drink drink, View sharedView) {
+                String drinkId = drink.getId();
+                Bundle bundle = new Bundle();
+                bundle.putString("drinkId", drinkId);
 
-            Bundle bundle = new Bundle();
-            bundle.putString("drinkId", drinkId);
+                FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                        .addSharedElement(sharedView, "image_" + drinkId)
+                        .build();
 
-            Navigation.findNavController(v).navigate(R.id.action_search_to_detail, bundle);
+                Navigation.findNavController(requireView()).navigate(R.id.action_search_to_detail, bundle, null, extras);
+            }
+
+            @Override
+            public void onFavoriteClick(Drink drink) {
+                // La lógica para añadir/quitar favoritos desde la lista
+                boolean isCurrentlyFavorite = adapter.isFavorite(drink.getId());
+                if (isCurrentlyFavorite) {
+                    repo.deleteFavoriteDrink(drink.getId());
+                    Toast.makeText(requireContext(), drink.getName() + " eliminado de favoritos", Toast.LENGTH_SHORT).show();
+                } else {
+                    repo.saveFavoriteDrink(drink);
+                    Toast.makeText(requireContext(), drink.getName() + " añadido a favoritos", Toast.LENGTH_SHORT).show();
+                }
+            }
         });
 
         repo = new DrinkRepository(requireContext());
