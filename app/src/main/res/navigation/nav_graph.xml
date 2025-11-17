@@ -55,6 +55,12 @@
         android:id="@+id/mapFragment"
         android:name="com.yamidev.drinkfinder.MapFragment"
         android:label="Bares Cercanos"
-        tools:layout="@layout/fragment_map" />
+        tools:layout="@layout/fragment_map" >
+
+        <deepLink
+            android:id="@+id/deepLinkMap"
+            app:uri="app://drinkfinder.com/map" />
+
+    </fragment>
 
 </navigation>
