@@ -139,19 +139,10 @@ public class SearchFragment extends Fragment implements ShakeDetector.OnShakeLis
                     return true;
                 }
 
-                if (menuItem.getItemId() == R.id.action_simulate_shake) {
-                    if (shakeDetector != null) {
-                        shakeDetector.simulateShake();
-                    }
-                    return true;
-                }
-
                 if (menuItem.getItemId() == R.id.action_logout) {
                     handleLogout();
                     return true;
                 }
-
-
 
                 return false;
             }
@@ -434,34 +425,30 @@ public class SearchFragment extends Fragment implements ShakeDetector.OnShakeLis
         requireActivity().finish();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        shakeDetector.startListening();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        shakeDetector.stopListening();
-    }
 
     @Override
     public void onShake() {
         Toast.makeText(requireContext(), "¡Buscando bebida aleatoria!", Toast.LENGTH_SHORT).show();
+
         repo.getRandomDrink(new DrinkRepository.Result<Drink>() {
             @Override
             public void onSuccess(Drink randomDrink) {
                 if (randomDrink != null && isAdded()) {
+                    // Muestra solo la bebida aleatoria
                     adapter.setItems(Collections.singletonList(randomDrink));
                 } else {
-                    Toast.makeText(requireContext(), "No se pudo obtener una bebida aleatoria.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(),
+                            "No se pudo obtener una bebida aleatoria.",
+                            Toast.LENGTH_SHORT).show();
                 }
             }
+
             @Override
             public void onError(Throwable t) {
-                if(isAdded()) {
-                    Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                if (isAdded()) {
+                    Toast.makeText(requireContext(),
+                            "Error: " + t.getMessage(),
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         });
