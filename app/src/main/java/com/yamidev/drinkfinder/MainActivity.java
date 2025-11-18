@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.yamidev.drinkfinder.drink.DrinkRepository;
 import com.yamidev.drinkfinder.drink.DrinkAdapter;
-import com.yamidev.drinkfinder.Drink;
 
 
 import java.util.List;
@@ -19,8 +18,7 @@ public class MainActivity extends AppCompatActivity {
 
     private DrinkAdapter adapter;
     private DrinkRepository repo;
-    private List<Drink> drinks;
-    public Drink drink;
+
 
 
     @SuppressLint({"MissingInflatedId", "ResourceType"})
@@ -33,15 +31,11 @@ public class MainActivity extends AppCompatActivity {
         adapter = new DrinkAdapter();
         rv.setAdapter(adapter);
 
-//        adapter.setOnItemClick(drink ->
-//                Toast.makeText(getApplicationContext(), getName(), Toast.LENGTH_SHORT).show()
-//        );
 
         repo = new DrinkRepository(getApplicationContext());
 
-        // Ejemplos: cambia la búsqueda según tu flujo
-        loadByName("margarita");  // muestra resultados en el RecyclerView
-        // loadByCategory("Ordinary Drink");
+        loadByName("margarita");
+
     }
 
     private void loadByName(String query) {

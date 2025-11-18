@@ -28,11 +28,25 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.yamidev.drinkfinder.map.MockNearbyBarsProvider;
+import com.yamidev.drinkfinder.map.NearByBar;
+import com.yamidev.drinkfinder.map.NearbyBarsProvider;
+import com.yamidev.drinkfinder.map.PlacesNearbyBarsProvider;
+
+import java.util.List;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
+
+    private NearbyBarsProvider nearbyBarsProvider;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        nearbyBarsProvider = new PlacesNearbyBarsProvider(requireContext());
+    }
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -90,13 +104,42 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f));
 
-                addMockMarkers(userLocation);
+                // Radio de 5 km
+                float radiusMeters = 5000f;
+
+                nearbyBarsProvider.getNearbyBars(userLocation, radiusMeters,
+                        new NearbyBarsProvider.NearbyBarsCallback() {
+                            @Override
+                            public void onResult(@NonNull List<NearByBar> bars) {
+                                for (NearByBar bar : bars) {
+                                    mMap.addMarker(new MarkerOptions()
+                                            .position(bar.getLatLng())
+                                            .title(bar.getName())
+                                            .snippet(bar.getDescription()));
+                                }
+
+                                mMap.setOnMarkerClickListener(marker -> {
+                                    Toast.makeText(requireContext(),
+                                            "Has tocado: " + marker.getTitle(),
+                                            Toast.LENGTH_SHORT).show();
+                                    return false;
+                                });
+                            }
+
+                            @Override
+                            public void onError(@NonNull Throwable t) {
+                                Toast.makeText(requireContext(),
+                                        "Error al obtener bares cercanos",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
             } else {
-                Toast.makeText(requireContext(), "No se pudo obtener la ubicación. Activa la ubicación del dispositivo.", Toast.LENGTH_LONG).show();
+                Toast.makeText(requireContext(),
+                        "No se pudo obtener la ubicación.",
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
-
     private void addMockMarkers(LatLng userLocation) {
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(userLocation.latitude + 0.001, userLocation.longitude + 0.001))

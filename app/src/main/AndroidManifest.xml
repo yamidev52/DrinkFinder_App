@@ -73,7 +73,8 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="LA_KEY_DE_LA_API_IRIA_AQUI" />
+            android:value="@string/google_maps_key"/>
+
 
     </application>
 
