@@ -164,30 +164,7 @@ implementation 'com.google.android.exoplayer:exoplayer:2.19.1'
 
 ### **Permisos Requeridos**
 
-```xml
-<!-- Internet y red -->
-<uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-<!-- Ubicación -->
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-<!-- Sensores -->
-<uses-permission android:name="android.permission.BODY_SENSORS" />
-
-<!-- Multimedia -->
-<uses-permission android:name="android.permission.RECORD_AUDIO" />
-<uses-permission android:name="android.permission.CAMERA" />
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
-<!-- Servicios en background -->
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-<uses-permission android:name="android.permission.WAKE_LOCK" />
-
-<!-- Comunicación externa -->
-<uses-permission android:name="android.permission.CALL_PHONE" />
-```
 
 ---
 

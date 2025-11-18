@@ -6,6 +6,7 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/searchFragment">
 
+    <!--suppress NavigationFile -->
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.yamidev.drinkfinder.SearchFragment"
@@ -22,6 +23,7 @@
             app:destination="@id/mapFragment" />
     </fragment>
 
+    <!--suppress NavigationFile -->
     <fragment
         android:id="@+id/detailFragment"
         android:name="com.yamidev.drinkfinder.DetailFragment"
@@ -35,6 +37,7 @@
             app:uri="pp://drinkfinder.com/drink/{drinkId}" />
     </fragment>
 
+    <!--suppress NavigationFile -->
     <fragment
         android:id="@+id/favoriteFragment"
         android:name="com.yamidev.drinkfinder.FavoriteFragment"
@@ -51,10 +54,17 @@
             app:destination="@id/mapFragment" />
     </fragment>
 
+    <!--suppress NavigationFile -->
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.yamidev.drinkfinder.MapFragment"
         android:label="Bares Cercanos"
-        tools:layout="@layout/fragment_map" />
+        tools:layout="@layout/fragment_map" >
+
+        <deepLink
+            android:id="@+id/deepLinkMap"
+            app:uri="app://drinkfinder.com/map" />
+
+    </fragment>
 
 </navigation>

@@ -32,6 +32,8 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.TransitionInflater;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -92,6 +94,8 @@ public class DetailFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setSharedElementEnterTransition(TransitionInflater.from(requireContext())
+                .inflateTransition(android.R.transition.move));
         setupActivityLaunchers();
     }
 
@@ -139,6 +143,7 @@ public class DetailFragment extends Fragment {
         if (getArguments() != null) {
             String drinkId = getArguments().getString("drinkId");
             if (drinkId != null && !drinkId.isEmpty()) {
+                imgDrinkDetail.setTransitionName("image_" + drinkId);
                 fetchDrinkDetails(drinkId);
                 observeFavoriteStatus(drinkId);
                 observeComments(drinkId);
@@ -362,15 +367,19 @@ public class DetailFragment extends Fragment {
     }
 
     private void showImageSourceDialog() {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Adjuntar Imagen")
-                .setItems(new CharSequence[]{"Tomar Foto", "Elegir de Galería"}, (dialog, which) -> {
-                    if (which == 0) {
-                        checkCameraPermissionAndLaunch();
-                    } else {
-                        pickImageLauncher.launch("image/*");
-                    }
-                }).show();
+        ImageSourceBottomSheet bottomSheet = new ImageSourceBottomSheet();
+        bottomSheet.setImageSourceListener(new ImageSourceBottomSheet.ImageSourceListener() {
+            @Override
+            public void onCameraSelected() {
+                checkCameraPermissionAndLaunch();
+            }
+
+            @Override
+            public void onGallerySelected() {
+                pickImageLauncher.launch("image/*");
+            }
+        });
+        bottomSheet.show(getParentFragmentManager(), "ImageSourceBottomSheet");
     }
 
     private void checkCameraPermissionAndLaunch() {
