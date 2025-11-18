@@ -165,6 +165,7 @@ public class DetailFragment extends Fragment {
                     repo.deleteFavoriteDrink(currentDrink.getId());
                 } else {
                     repo.saveFavoriteDrink(currentDrink);
+                    appNotifier.show("Favorito agregado", "Guardaste el Mojito en tus favoritos");
                 }
             }
         });
@@ -420,7 +421,7 @@ public class DetailFragment extends Fragment {
 
     private void sendDrinkNotification() {
         if (currentDrink != null) {
-            appNotifier.showDrinkOfferNotification(currentDrink.getId(), currentDrink.getName());
+            appNotifier.show(currentDrink.getId(), currentDrink.getName());
         } else {
             Toast.makeText(requireContext(), "No se puede crear el recordatorio.", Toast.LENGTH_SHORT).show();
         }
