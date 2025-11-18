@@ -9,21 +9,29 @@ import androidx.room.TypeConverters;
 
 import com.yamidev.drinkfinder.auth.UserDAO;
 import com.yamidev.drinkfinder.auth.UserEntity;
+import com.yamidev.drinkfinder.model.CommentDAO;
+import com.yamidev.drinkfinder.model.CommentEntity;
 
 @Database(
-        entities = {DrinkEntity.class, UserEntity.class},
-        version = 2,
+        entities = {
+                DrinkEntity.class,
+                UserEntity.class,
+                CommentEntity.class
+        },
+        version = 3,
         exportSchema = false
 )
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
 
-    public abstract DrinkDao drinkDao();
-    public abstract UserDAO userDAO();  // 👈 ya lo tenías, está bien
-
     private static volatile AppDatabase INSTANCE;
 
-    public static AppDatabase getInstance(final Context context) {
+    // === DAOs ===
+    public abstract DrinkDao drinkDao();
+    public abstract UserDAO userDAO();
+    public abstract CommentDAO commentDao();
+
+    public static AppDatabase getInstance(Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
@@ -32,7 +40,7 @@ public abstract class AppDatabase extends RoomDatabase {
                                     AppDatabase.class,
                                     "drink_finder_database"
                             )
-                            // Como estamos en desarrollo, tiramos la BD anterior si cambia el esquema
+                            // En desarrollo, destruye la BD si cambia el esquema
                             .fallbackToDestructiveMigration()
                             .build();
                 }

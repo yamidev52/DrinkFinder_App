@@ -1,4 +1,4 @@
-package com.yamidev.drinkfinder.drink;
+package com.yamidev.drinkfinder.model;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,7 +7,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.yamidev.drinkfinder.R;
-import com.yamidev.drinkfinder.model.Comment;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +53,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         }
 
         void bind(Comment comment) {
-            tvAuthor.setText(comment.getAuthor());
+            tvAuthor.setText(comment.getUsername());
             tvText.setText(comment.getText());
         }
     }

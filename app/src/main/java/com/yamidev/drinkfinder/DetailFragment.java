@@ -38,7 +38,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.yamidev.drinkfinder.drink.CommentAdapter;
+import com.yamidev.drinkfinder.model.CommentAdapter;
 import com.yamidev.drinkfinder.drink.DrinkRepository;
 import com.yamidev.drinkfinder.drink.ImagePreviewAdapter;
 import com.yamidev.drinkfinder.model.Comment;
@@ -180,17 +180,41 @@ public class DetailFragment extends Fragment {
             return;
         }
 
-        List<String> imageUrls = imagePreviewAdapter.getImageUris().stream()
-                .map(Uri::toString)
-                .collect(Collectors.toCollection(ArrayList::new));
-
-        Comment newComment = new Comment("Tú (Frontend)", commentText);
-        repo.addCommentForDrink(drinkId, newComment);
-        etNewComment.setText("");
-        while(imagePreviewAdapter.getItemCount() > 0) {
-            imagePreviewAdapter.removeImage(0);
+        // 1) Obtener la URI de la PRIMERA imagen (si hay)
+        String imageUriString = null;
+        if (imagePreviewAdapter != null) {
+            List<Uri> uris = imagePreviewAdapter.getImageUris();
+            if (uris != null && !uris.isEmpty()) {
+                // 👇 aquí SOLO usamos get(0) si la lista NO está vacía
+                imageUriString = uris.get(0).toString();
+            }
         }
-        rvImagePreviews.setVisibility(View.GONE);
+
+        // 2) Crear el Comment usando TU clase de dominio
+        long now = System.currentTimeMillis();
+        String username = "Tú (Frontend)";
+
+        Comment newComment = new Comment(
+                drinkId,        // id de la bebida
+                commentText,    // texto del comentario
+                username,       // nombre de usuario
+                now,            // timestamp
+                imageUriString  // uri de la imagen o null
+        );
+
+        // 3) Guardar el comentario en el repositorio
+        repo.addComment(drinkId, commentText, username, imageUriString);
+
+        // 4) Limpiar UI
+        etNewComment.setText("");
+
+        if (imagePreviewAdapter != null) {
+            // Vaciar las imágenes del preview sin reventar índices
+            while (imagePreviewAdapter.getItemCount() > 0) {
+                imagePreviewAdapter.removeImage(0);
+            }
+            rvImagePreviews.setVisibility(View.GONE);
+        }
     }
 
     private void fetchDrinkDetails(String id) {

@@ -7,9 +7,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.yamidev.drinkfinder.DrinkRepository;
-import com.yamidev.drinkfinder.Drink;
-import com.yamidev.drinkfinder.DrinkAdapter;
+import com.yamidev.drinkfinder.drink.DrinkAdapter;
+import com.yamidev.drinkfinder.drink.DrinkRepository;
 
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, drink.getName(), Toast.LENGTH_SHORT).show()
         );
 
-        repo = new DrinkRepository();
+        repo = new DrinkRepository(this);
 
         // Ejemplos: cambia la búsqueda según tu flujo
         loadByName("margarita");  // muestra resultados en el RecyclerView

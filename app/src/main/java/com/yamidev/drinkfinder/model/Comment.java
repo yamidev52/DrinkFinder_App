@@ -1,33 +1,40 @@
 package com.yamidev.drinkfinder.model;
 
-// Este es el modelo de comentarios @Yamil
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 public class Comment {
-    private final String id;
-    private final String author;
-    private final String text;
-    private final long timestamp;
-    private final List<String> imageUrls;
 
-    public Comment(String author, String text, List<String> imageUrls) {
-        this.id = UUID.randomUUID().toString();
-        this.author = author;
+    private long id;
+    private String drinkId;
+    private String text;
+    private String username;
+    private long createdAt;
+    private String imageUri; // opcional
+
+    public Comment(long id,
+                   String drinkId,
+                   String text,
+                   String username,
+                   long createdAt,
+                   String imageUri) {
+        this.id = id;
+        this.drinkId = drinkId;
         this.text = text;
-        this.timestamp = System.currentTimeMillis();
-        this.imageUrls = imageUrls != null ? imageUrls : new ArrayList<>();
+        this.username = username;
+        this.createdAt = createdAt;
+        this.imageUri = imageUri;
     }
 
-    public Comment(String author, String text) {
-        this(author, text, null);
+    public Comment(String drinkId,
+                   String text,
+                   String username,
+                   long createdAt,
+                   String imageUri) {
+        this(0, drinkId, text, username, createdAt, imageUri);
     }
 
-    public String getId() { return id; }
-    public String getAuthor() { return author; }
+    public long getId() { return id; }
+    public String getDrinkId() { return drinkId; }
     public String getText() { return text; }
-    public long getTimestamp() { return timestamp; }
-    public List<String> getImageUrls() { return imageUrls; }
+    public String getUsername() { return username; }
+    public long getCreatedAt() { return createdAt; }
+    public String getImageUri() { return imageUri; }
 }
