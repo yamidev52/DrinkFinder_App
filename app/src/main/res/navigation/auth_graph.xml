@@ -4,6 +4,7 @@
     android:id="@+id/auth_graph"
     app:startDestination="@id/loginFragment">
 
+    <!--suppress NavigationFile -->
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.yamidev.drinkfinder.LoginFragment"
@@ -11,7 +12,13 @@
         <action
             android:id="@+id/action_loginFragment_to_registerFragment"
             app:destination="@id/registerFragment" />
+
+        <deepLink
+            android:id="@+id/deepLinkLogin"
+            app:uri="app://drinkfinder.com/login" />
+
     </fragment>
+    <!--suppress NavigationFile -->
     <fragment
         android:id="@+id/registerFragment"
         android:name="com.yamidev.drinkfinder.RegisterFragment"

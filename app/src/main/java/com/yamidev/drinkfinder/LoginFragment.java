@@ -1,27 +1,33 @@
 package com.yamidev.drinkfinder;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
+
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.yamidev.drinkfinder.auth.FakeAuthService;
+import com.yamidev.drinkfinder.auth.AuthViewModel;
+import com.yamidev.drinkfinder.auth.AuthViewModelFactory;
+import com.yamidev.drinkfinder.local.AppDatabase;
+import com.yamidev.drinkfinder.auth.AuthRepository;
+import com.yamidev.drinkfinder.auth.AuthRepositoryImpl;
 
 public class LoginFragment extends Fragment {
 
     private TextInputLayout tilEmail, tilPassword;
     private TextInputEditText etEmail, etPassword;
-    private FakeAuthService authService;
+
+    private AuthViewModel authViewModel;
 
     public LoginFragment() {
         super(R.layout.fragment_login);
@@ -38,41 +44,59 @@ public class LoginFragment extends Fragment {
         Button btnLogin = view.findViewById(R.id.btn_login);
         TextView tvGoToRegister = view.findViewById(R.id.tv_go_to_register);
 
-        authService = new FakeAuthService();
+        // Crear repo + viewModel
+        AppDatabase db = AppDatabase.getInstance(requireContext());
+        AuthRepository repository = new AuthRepositoryImpl(db.userDAO());
+        AuthViewModelFactory factory = new AuthViewModelFactory(repository);
+        authViewModel = new ViewModelProvider(this, factory).get(AuthViewModel.class);
+
+        setupObservers();
+
+        // Cargar sesión si ya había usuario logueado
+        authViewModel.loadSession();
 
         btnLogin.setOnClickListener(v -> handleLogin());
         tvGoToRegister.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_registerFragment));
     }
 
+    private void setupObservers() {
+        // Resultado de login
+        authViewModel.getLoginResult().observe(getViewLifecycleOwner(), result -> {
+            if (result == null) return;
+
+            if (result.isSuccess()) {
+                if (!isAdded()) return;
+
+                // Usuario logueado correctamente, ir a HomeActivity
+                Intent intent = new Intent(requireActivity(), HomeActivity.class);
+                startActivity(intent);
+                requireActivity().finish();
+            } else {
+                if (!isAdded()) return;
+                Toast.makeText(requireContext(), result.getErrorMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        // Si ya hay sesión activa al abrir el fragment, saltar directo al Home
+        authViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
+            if (user != null && isAdded()) {
+                Intent intent = new Intent(requireActivity(), HomeActivity.class);
+                startActivity(intent);
+                requireActivity().finish();
+            }
+        });
+    }
+
     private void handleLogin() {
-        String email = etEmail.getText().toString();
-        String password = etPassword.getText().toString();
+        String email = etEmail.getText() != null ? etEmail.getText().toString() : "";
+        String password = etPassword.getText() != null ? etPassword.getText().toString() : "";
 
         if (!validateForm(email, password)) {
             return;
         }
 
-        authService.login(email, password, new FakeAuthService.AuthCallback() {
-            @Override
-            public void onSuccess() {
-                if (!isAdded()) return;
-
-                SharedPreferences prefs = requireActivity().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE);
-                prefs.edit().putBoolean("isLoggedIn", true).apply();
-
-
-                Intent intent = new Intent(requireActivity(), HomeActivity.class);
-                startActivity(intent);
-                requireActivity().finish();
-            }
-
-            @Override
-            public void onError(String message) {
-                if (!isAdded()) return;
-                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
-            }
-        });
+        authViewModel.signIn(email, password);
     }
 
     private boolean validateForm(String email, String password) {

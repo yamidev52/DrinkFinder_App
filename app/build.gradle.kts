@@ -59,6 +59,7 @@ dependencies {
 
     // Image Loading (Glide)
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(libs.play.services.maps)
     kapt("com.github.bumptech.glide:compiler:4.16.0") // Usamos kapt para Glide también
 
     // Room Database
@@ -74,4 +75,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // Maps
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.2.0")
+    implementation ("com.google.android.libraries.places:places:3.4.0")
+
 }

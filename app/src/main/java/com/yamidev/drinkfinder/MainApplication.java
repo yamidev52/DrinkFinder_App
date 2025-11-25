@@ -18,7 +18,6 @@ public class MainApplication extends Application {
     public void onCreate() {
         super.onCreate();
         schedulePeriodicSync();
-        createNotificationChannels();
     }
 
     private void schedulePeriodicSync() {
@@ -33,16 +32,4 @@ public class MainApplication extends Application {
         );
     }
 
-    private void createNotificationChannels() {
-        NotificationChannel updatesChannel = new NotificationChannel(
-                UPDATES_CHANNEL_ID,
-                "Actualizaciones de Datos",
-                NotificationManager.IMPORTANCE_LOW
-        );
-        updatesChannel.setDescription("Notificaciones para tareas de larga duración");
-
-        NotificationManager manager = getSystemService(NotificationManager.class);
-        manager.createNotificationChannel(updatesChannel);
-
-    }
 }

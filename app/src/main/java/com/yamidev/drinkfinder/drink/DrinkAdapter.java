@@ -13,17 +13,14 @@ import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.yamidev.drinkfinder.Drink;
 import com.yamidev.drinkfinder.R;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -35,18 +32,17 @@ import java.util.Set;
 
 public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> implements Filterable {
 
-    public interface OnItemClick { void onClick(Drink drink); }
+    public interface OnItemClick {
+        void onClick(Drink drink, View sharedView);
+        void onFavoriteClick(Drink drink);
+    }
 
     private final List<Drink> items = new ArrayList<>();
-    private final List<Drink> all   = new ArrayList<>();
-
+    private final List<Drink> all = new ArrayList<>();
     private OnItemClick listener;
-
-    // Criterios de filtro
     private String q = "";
     private String category = "Todas";
-    private String alcoholic = "Todos"; // Alcoholic, Non alcoholic, Optional alcohol, Todos
-
+    private String alcoholic = "Todos";
     private final Set<String> favoriteDrinkIds = new HashSet<>();
 
     public void setOnItemClick(OnItemClick l) { this.listener = l; }
@@ -56,8 +52,11 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
         for (Drink drink : favoriteDrinks) {
             favoriteDrinkIds.add(drink.getId());
         }
-
         notifyDataSetChanged();
+    }
+
+    public boolean isFavorite(String drinkId) {
+        return favoriteDrinkIds.contains(drinkId);
     }
 
     public void setItems(List<Drink> newItems) {
@@ -70,12 +69,11 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
         notifyDataSetChanged();
     }
 
-    /** Actualiza criterios y aplica filtro */
     public void applyFilter(String query, String category, String alcoholic) {
         this.q = query == null ? "" : query.trim();
         this.category = category == null ? "Todas" : category;
         this.alcoholic = alcoholic == null ? "Todos" : alcoholic;
-        getFilter().filter(""); // dispara el filtro
+        getFilter().filter("");
     }
 
     @NonNull @Override
@@ -90,15 +88,14 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
         Drink d = items.get(position);
         h.tvName.setText(d.getName() != null ? d.getName() : "");
         h.tvCategory.setText(d.getCategory() != null ? d.getCategory() : "");
+
+        h.img.setTransitionName("image_" + d.getId());
+
         Glide.with(h.img.getContext())
                 .load(d.getThumbnail())
                 .placeholder(R.mipmap.ic_launcher)
                 .centerCrop()
                 .into(h.img);
-        h.itemView.setOnClickListener(v -> { if (listener != null) listener.onClick(d); });
-        h.btnShare.setOnClickListener(v -> {
-            shareDrinkWithImage(v.getContext(), d);
-        });
 
         if (favoriteDrinkIds.contains(d.getId())) {
             h.btnFavorite.setImageResource(R.drawable.ic_favorite_filled);
@@ -107,11 +104,16 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
         }
 
         h.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onClick(d);
-            }
+            if (listener != null) listener.onClick(d, h.img);
         });
 
+        h.btnFavorite.setOnClickListener(v -> {
+            if (listener != null) listener.onFavoriteClick(d);
+        });
+
+        h.btnShare.setOnClickListener(v -> {
+            shareDrinkWithImage(v.getContext(), d);
+        });
     }
 
     @Override public int getItemCount() { return items.size(); }
@@ -122,17 +124,10 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
             @Override protected FilterResults performFiltering(CharSequence constraint) {
                 List<Drink> filtered = new ArrayList<>();
                 String qLower = q.toLowerCase(Locale.ROOT);
-
                 for (Drink d : all) {
-                    boolean byName = qLower.isEmpty()
-                            || (d.getName() != null && d.getName().toLowerCase(Locale.ROOT).contains(qLower));
-
-                    boolean byCategory = "Todas".equals(category)
-                            || (d.getCategory() != null && d.getCategory().equalsIgnoreCase(category));
-
-                    boolean byAlcoholic = "Todos".equals(alcoholic)
-                            || (d.getAlcoholic() != null && d.getAlcoholic().equalsIgnoreCase(alcoholic));
-
+                    boolean byName = qLower.isEmpty() || (d.getName() != null && d.getName().toLowerCase(Locale.ROOT).contains(qLower));
+                    boolean byCategory = "Todas".equals(category) || (d.getCategory() != null && d.getCategory().equalsIgnoreCase(category));
+                    boolean byAlcoholic = "Todos".equals(alcoholic) || (d.getAlcoholic() != null && d.getAlcoholic().equalsIgnoreCase(alcoholic));
                     if (byName && byCategory && byAlcoholic) filtered.add(d);
                 }
                 FilterResults r = new FilterResults();
@@ -185,45 +180,36 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkVH> imp
     private void shareDrinkWithImage(Context ctx, Drink drink) {
         String imageUrl = drink.getThumbnail();
         String body = buildShareText(drink);
-
-        Glide.with(ctx)
-                .asBitmap()
-                .load(imageUrl)
-                .into(new CustomTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        try {
-                            Uri uri = saveBitmapToCache(ctx, resource, drink.getName());
-                            Intent share = new Intent(Intent.ACTION_SEND);
-                            share.setType("image/*");
-                            share.putExtra(Intent.EXTRA_STREAM, uri);
-                            share.putExtra(Intent.EXTRA_TEXT, body);
-                            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            ctx.startActivity(Intent.createChooser(share, "Compartir bebida…"));
-                        } catch (IOException e) {
-                            shareDrinkText(ctx, drink);
-                        }
-                    }
-
-                    @Override public void onLoadCleared(@Nullable Drawable placeholder) {}
-                    @Override public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                        shareDrinkText(ctx, drink);
-                    }
-                });
+        Glide.with(ctx).asBitmap().load(imageUrl).into(new CustomTarget<Bitmap>() {
+            @Override
+            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                try {
+                    Uri uri = saveBitmapToCache(ctx, resource, drink.getName());
+                    Intent share = new Intent(Intent.ACTION_SEND);
+                    share.setType("image/*");
+                    share.putExtra(Intent.EXTRA_STREAM, uri);
+                    share.putExtra(Intent.EXTRA_TEXT, body);
+                    share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    ctx.startActivity(Intent.createChooser(share, "Compartir bebida…"));
+                } catch (IOException e) {
+                    shareDrinkText(ctx, drink);
+                }
+            }
+            @Override public void onLoadCleared(@Nullable Drawable placeholder) {}
+            @Override public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                shareDrinkText(ctx, drink);
+            }
+        });
     }
 
     private Uri saveBitmapToCache(Context ctx, Bitmap bmp, String name) throws IOException {
         File imagesFolder = new File(ctx.getCacheDir(), "images");
         if (!imagesFolder.exists()) imagesFolder.mkdirs();
-
         File file = new File(imagesFolder, name.replaceAll("\\s+", "_") + ".jpg");
         FileOutputStream stream = new FileOutputStream(file);
         bmp.compress(Bitmap.CompressFormat.JPEG, 95, stream);
         stream.flush();
         stream.close();
-
-        return androidx.core.content.FileProvider.getUriForFile(
-                ctx, ctx.getPackageName() + ".fileprovider", file
-        );
+        return androidx.core.content.FileProvider.getUriForFile(ctx, ctx.getPackageName() + ".fileprovider", file);
     }
 }

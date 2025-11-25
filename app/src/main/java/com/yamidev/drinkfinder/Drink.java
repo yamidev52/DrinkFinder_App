@@ -12,7 +12,6 @@ public class Drink {
     private final String instructions;
     private final String thumbnail;
 
-    // Guardamos ingredientes y medidas ya “emparejados”
     private final List<String> ingredients; // ej. "50ml Vodka", "1/2 Lime", etc.
 
     public Drink(String id,

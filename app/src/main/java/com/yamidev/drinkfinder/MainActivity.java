@@ -1,5 +1,6 @@
 package com.yamidev.drinkfinder;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -7,9 +8,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.yamidev.drinkfinder.DrinkRepository;
-import com.yamidev.drinkfinder.Drink;
-import com.yamidev.drinkfinder.DrinkAdapter;
+import com.yamidev.drinkfinder.drink.DrinkRepository;
+import com.yamidev.drinkfinder.drink.DrinkAdapter;
+
 
 import java.util.List;
 
@@ -18,24 +19,23 @@ public class MainActivity extends AppCompatActivity {
     private DrinkAdapter adapter;
     private DrinkRepository repo;
 
+
+
+    @SuppressLint({"MissingInflatedId", "ResourceType"})
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_auth);
 
-        RecyclerView rv = findViewById(R.id.rvDrinks);
+        @SuppressLint({"MissingInflatedId", "LocalSuppress"}) RecyclerView rv = findViewById(R.id.rvDrinks);
         adapter = new DrinkAdapter();
         rv.setAdapter(adapter);
 
-        adapter.setOnItemClick(drink ->
-                Toast.makeText(this, drink.getName(), Toast.LENGTH_SHORT).show()
-        );
 
-        repo = new DrinkRepository();
+        repo = new DrinkRepository(getApplicationContext());
 
-        // Ejemplos: cambia la búsqueda según tu flujo
-        loadByName("margarita");  // muestra resultados en el RecyclerView
-        // loadByCategory("Ordinary Drink");
+        loadByName("margarita");
+
     }
 
     private void loadByName(String query) {

@@ -12,7 +12,12 @@ import com.yamidev.drinkfinder.api.CocktailApi;
 import com.yamidev.drinkfinder.api.RetrofitClient;
 import com.yamidev.drinkfinder.local.AppDatabase;
 import com.yamidev.drinkfinder.local.DrinkDao;
+import com.yamidev.drinkfinder.model.CommentDAO;
 import com.yamidev.drinkfinder.local.DrinkEntity;
+
+import com.yamidev.drinkfinder.model.Comment;
+import com.yamidev.drinkfinder.model.CommentEntity;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -30,9 +35,11 @@ public class DrinkRepository {
 
     private final CocktailApi api;
     private final DrinkDao drinkDao;
+    private final CommentDAO commentDao;
     private final ExecutorService executor;
 
     public DrinkRepository(Context context) {
+        this.commentDao = AppDatabase.getInstance(context).commentDao();
         this.api = RetrofitClient.getApi();
         this.drinkDao = AppDatabase.getInstance(context).drinkDao();
         this.executor = Executors.newSingleThreadExecutor();
@@ -155,4 +162,40 @@ public class DrinkRepository {
             }
         });
     }
+
+    public LiveData<List<Comment>> getCommentsForDrink(String drinkId) {
+        return Transformations.map(
+                commentDao.getCommentsForDrink(drinkId),
+                entities -> {
+                    List<Comment> result = new ArrayList<>();
+                    if (entities != null) {
+                        for (CommentEntity e : entities) {
+                            result.add(e.toDomain());
+                        }
+                    }
+                    return result;
+                }
+        );
+    }
+
+    public void addComment(String drinkId,
+                           String text,
+                           String username,
+                           String imageUri) {
+
+        long now = System.currentTimeMillis();
+        Comment comment = new Comment(
+                drinkId,
+                text,
+                username,
+                now,
+                imageUri
+        );
+        CommentEntity entity = CommentEntity.fromDomain(comment);
+
+        executor.execute(() -> commentDao.insert(entity));
+    }
+
+
+
 }
