@@ -19,11 +19,6 @@
         android:id="@+id/action_full_sync"
         android:title="@string/actualizacion" />
 
-    <item
-        android:id="@+id/mapFragment"
-        android:title="@string/item_map"
-        android:icon="@android:drawable/ic_dialog_map" />
-
 
     <item
         android:id="@+id/action_logout"

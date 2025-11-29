@@ -18,9 +18,6 @@
         <action
             android:id="@+id/action_search_to_favorites"
             app:destination="@id/favoriteFragment" />
-        <action
-            android:id="@+id/action_search_to_map"
-            app:destination="@id/mapFragment" />
     </fragment>
 
     <!--suppress NavigationFile -->
@@ -49,22 +46,7 @@
         <action
             android:id="@+id/action_favorites_to_search"
             app:destination="@id/searchFragment" />
-        <action
-            android:id="@+id/action_favorites_to_map"
-            app:destination="@id/mapFragment" />
     </fragment>
 
-    <!--suppress NavigationFile -->
-    <fragment
-        android:id="@+id/mapFragment"
-        android:name="com.yamidev.drinkfinder.MapFragment"
-        android:label="Bares Cercanos"
-        tools:layout="@layout/fragment_map" >
-
-        <deepLink
-            android:id="@+id/deepLinkMap"
-            app:uri="app://drinkfinder.com/map" />
-
-    </fragment>
 
 </navigation>
