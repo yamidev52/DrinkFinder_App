@@ -175,6 +175,7 @@ public class DetailFragment extends Fragment {
         repo.getCommentsForDrink(drinkId).observe(getViewLifecycleOwner(), comments -> {
             if (isAdded()) {
                 commentAdapter.setComments(comments);
+
             }
         });
     }
@@ -186,32 +187,29 @@ public class DetailFragment extends Fragment {
             return;
         }
 
-        // 1) Obtener la URI de la PRIMERA imagen (si hay)
+
         String imageUriString = null;
         if (imagePreviewAdapter != null) {
             List<Uri> uris = imagePreviewAdapter.getImageUris();
             if (uris != null && !uris.isEmpty()) {
-                // 👇 aquí SOLO usamos get(0) si la lista NO está vacía
+
                 imageUriString = uris.get(0).toString();
             }
         }
 
-        // 2) Crear el Comment usando TU clase de dominio
         long now = System.currentTimeMillis();
-        String username = "Tú (Frontend)";
+        String username = "Usuario";
 
         Comment newComment = new Comment(
-                drinkId,        // id de la bebida
-                commentText,    // texto del comentario
-                username,       // nombre de usuario
-                now,            // timestamp
-                imageUriString  // uri de la imagen o null
+                drinkId,
+                commentText,
+                username,
+                now,
+                imageUriString
         );
 
-        // 3) Guardar el comentario en el repositorio
         repo.addComment(drinkId, commentText, username, imageUriString);
 
-        // 4) Limpiar UI
         etNewComment.setText("");
 
         if (imagePreviewAdapter != null) {
